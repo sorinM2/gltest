@@ -1,5 +1,10 @@
 #include "application.h"
+
+#define GLAD_GL_IMPLEMENTATION
+#include "glad/glad.h"
+
 #include "GLFW/glfw3.h"
+
 #include <iostream>
 
 void error_callback(int error, const char* description)
@@ -22,7 +27,11 @@ bool application::Initialize()
 		std::cout << "GLFW initialization failed!" << std::endl;
 		return false;
 	}
-	
+
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 	_window = glfwCreateWindow(800, 800, "fereastra", NULL, NULL);
 
 	if ( ! _window )
@@ -33,6 +42,7 @@ bool application::Initialize()
 	glfwSetKeyCallback(_window, key_callback);		
 	glfwMakeContextCurrent(_window);
 
+	int version = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
 	return true;
 }
