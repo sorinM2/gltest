@@ -35,13 +35,12 @@ int main() {
 			std::this_thread::sleep_for(std::chrono::milliseconds(int(frame_duration * 1000 - frame_difference * 1000)));
 		frame_count ++;
 
-		if ( frame_end - counter_start > 1.0 )
-		{
-			std::cout << "FPS: " << frame_count << std::endl;
-			frame_count = 0;
-			counter_start = frame_end;
-		}
-	}
+                if (frame_end - counter_start > 1.0) {
+                  std::cout << "FPS: " << frame_count << std::endl;
+                  frame_count = 0;
+                  counter_start = frame_end;
+                }
+        }
 
 	_application->Finalize();
 

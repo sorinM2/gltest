@@ -1,5 +1,6 @@
 #pragma once
-
+#include "core/shader.h"
+#include <memory>
 struct GLFWwindow;
 
 class application
@@ -14,8 +15,9 @@ public:
 private:
 	unsigned int _program;
 	unsigned int _VAO;
-	unsigned int _vertexShader = 0;
-	unsigned int _fragmentShader = 0;
+	unsigned int _EBO;
+	std::unique_ptr<shader> _vertexShader{nullptr};
+	std::unique_ptr<shader> _fragmentShader{nullptr};
 	unsigned int _VBO;
 	GLFWwindow* _window;
 	bool _finished = false;

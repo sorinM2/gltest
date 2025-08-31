@@ -1,15 +1,9 @@
 #include "application.h"
+#include "core/common.h"
 #include "shaders/ShadersPath.h"
-#include <fstream>
-#include <sstream>
-#include "utility/unmove.h"
-
-#define GLAD_GL_IMPLEMENTATION
-#include "glad/glad.h"
-
-#include "GLFW/glfw3.h"
-
+#include "core/shader.h"
 #include <iostream>
+#include <memory>
 
 void error_callback(int error, const char* description)
 {	
@@ -28,7 +22,14 @@ float vertices[] =
 {
 	-0.5f, -0.5f, 0.0f,
 	0.5f, -0.5f, 0.0f,
-	0.0f, 0.5f, 0.0f
+	0.5f, 0.5f, 0.0f,
+	-0.5f, 0.5f, 0.0f
+};
+
+int indices[] = 
+{
+	0, 1, 2,
+	0, 2, 3
 };
 
 bool application::Initialize()
@@ -56,70 +57,28 @@ bool application::Initialize()
 	int version = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
 	glGenBuffers(1, &_VBO);
-
-
 	glGenVertexArrays(1, &_VAO);
 	glBindVertexArray(_VAO);
-
 	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &_EBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	std::cout << "Shader path: " << shaders::GetShadersPath() << std::endl;
 
- 	std::ifstream vertex(shaders::GetShadersPath() + "vertex.glsl");
-	{
-		std::stringstream buffer;
-		buffer << vertex.rdbuf();
+	
+	_vertexShader = std::make_unique<shader>(shaders::GetShadersPath() + "vertex.glsl", GL_VERTEX_SHADER);
+	_fragmentShader = std::make_unique<shader>(shaders::GetShadersPath() + "fragment.glsl", GL_FRAGMENT_SHADER);
 
-		//std:: cout << "Vertex Shader code:\n" << buffer.str() << std::endl;
-
-		_vertexShader = glCreateShader(GL_VERTEX_SHADER);
-		
-		glShaderSource(_vertexShader, 1, &util::unmove(buffer.str().c_str()), NULL);
-		glCompileShader(_vertexShader);
-	}
+	_program = glCreateProgram();
+	glAttachShader(_program, _vertexShader->GetId());
+	glAttachShader(_program, _fragmentShader->GetId());
+	glLinkProgram(_program);
 
 	int success;
 	char infoLog[512];
-	glGetShaderiv(_vertexShader, GL_COMPILE_STATUS, &success);
-
-	if ( !success )
-	{
-		glGetShaderInfoLog(_vertexShader, 512, NULL, infoLog);
-		std::cout << "Error compilating vertex shader!" << std::endl;
-		std::cout << infoLog << std::endl;
-	}
-	vertex.close();
-
-	std::ifstream fragment(shaders::GetShadersPath() + "fragment.glsl");
-
-	{
-		std::stringstream buffer;
-		buffer << fragment.rdbuf();
-
-		//std:: cout << "Vertex Shader code:\n" << buffer.str() << std::endl;
-
-		_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-		
-		glShaderSource(_fragmentShader, 1, &util::unmove(buffer.str().c_str()), NULL);
-		glCompileShader(_fragmentShader);
-	}	
-
-	glGetShaderiv(_fragmentShader, GL_COMPILE_STATUS, &success);
-
-	if ( !success )
-	{
-		glGetShaderInfoLog(_fragmentShader, 512, NULL, infoLog);
-		std::cout << "Error compiling fragment shader!" << std::endl;
-		std::cout << infoLog << std::endl;
-	}
-
-	_program = glCreateProgram();
-	glAttachShader(_program, _vertexShader);
-	glAttachShader(_program, _fragmentShader);
-	glLinkProgram(_program);
-
 	glGetProgramiv(_program, GL_LINK_STATUS, &success);
 	if ( !success )
 	{
@@ -130,8 +89,8 @@ bool application::Initialize()
 
 	glUseProgram(_program);
 
-	glDeleteShader(_vertexShader);
-	glDeleteShader(_fragmentShader);
+	_vertexShader->Destroy();
+	_fragmentShader->Destroy();
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 *  sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
@@ -154,7 +113,7 @@ void application::Run()
 	glClear(GL_COLOR_BUFFER_BIT);
 	glUseProgram(_program);
 	glBindVertexArray(_VAO);
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	glfwSwapBuffers(_window);
 	glfwPollEvents();
