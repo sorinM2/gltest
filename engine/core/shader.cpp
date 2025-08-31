@@ -5,8 +5,9 @@
 #include <iostream>
 #include "utility/unmove.h"
 
-shader::shader(std::string path, GLenum shader_type)
+shader::shader(const std::string& path, GLenum shader_type)
 {
+	_path = path;
 	std::ifstream shader(path);
 	{
 		std::stringstream buffer;

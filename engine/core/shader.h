@@ -5,8 +5,7 @@
 class shader 
 {
 public:
-	shader(std::string path, GLenum shader_type);
-
+	shader(const std::string& path, GLenum shader_type);
 	std::string GetPath() const { return _path; }
 	unsigned int GetId() const { return _id; }
 	bool IsActive() const { return _active; }
