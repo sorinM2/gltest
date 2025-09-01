@@ -6,10 +6,12 @@
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
+#include "glm/matrix.hpp"
 #include "glm/trigonometric.hpp"
 #include "shaders/ShadersPath.h"
 #include <iostream>
 #include <memory>
+#include "core/camera.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stbi/stb_image.h"
@@ -151,6 +153,9 @@ bool application::Initialize()
 	stbi_image_free(data);
 	
 	glEnable(GL_DEPTH_TEST);
+
+	camera::Initialize(_window);
+
 	return true;
 }
 
@@ -174,12 +179,13 @@ void application::Run()
 	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 	glm::mat4 view = glm::mat4(1.f);
-	view = glm::translate(view, glm::vec3(0.f, 0.f, -3.0f));
+	view = glm::inverse(camera::GetViewMatrix());
 
 	
 	_program->SetUniformMatrix4fv("view", false, glm::value_ptr(view));
 	_program->SetUniformMatrix4fv("projection", false, glm::value_ptr(projection));
-
+	
+	camera::Update();
 	for ( unsigned int i = 0; i < 10; ++i )
 	{
 		glm::mat4 model = glm::mat4(1.f);
