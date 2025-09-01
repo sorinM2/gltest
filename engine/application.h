@@ -13,6 +13,7 @@ public:
 	bool IsFinished() const { return _finished; }
 
 private:
+	unsigned int _texture;
 	std::unique_ptr<program> _program;
 	unsigned int _VAO;
 	unsigned int _EBO;

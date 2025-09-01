@@ -28,7 +28,7 @@ shader::shader(const std::string& path, GLenum shader_type)
 	if ( !success )
 	{
 		glGetShaderInfoLog(_id, 512, NULL, infoLog);
-		std::cout << "Error compilating shader shader!" << std::endl;
+		std::cout << "Error compilating: " << path << std::endl;
 		std::cout << infoLog << std::endl;
 	}
 	shader.close();
