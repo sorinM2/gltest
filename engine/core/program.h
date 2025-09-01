@@ -61,8 +61,7 @@ public:
 	void SetUniform3uiv(const std::string& uniform_name, const unsigned int* adr, int count = 1) { glUniform1uiv(GetUniformLocation(uniform_name), count, adr); }
 	void SetUniform4uiv(const std::string& uniform_name, const unsigned int* adr, int count = 1) { glUniform1uiv(GetUniformLocation(uniform_name), count, adr); }
 
-	void SetUniformMatrix2fv(const std::string& uniform_name, bool transposed, const float* adr, int count = 1) {  glUniformMatrix2fv(GetUniformLocation(uniform_name), count, transposed, adr); }
-	void SetUniformMatrix3fv(const std::string& uniform_name, bool transposed, const float* adr, int count = 1) {  glUniformMatrix3fv(GetUniformLocation(uniform_name), count, transposed, adr); }
-	void SetUniformMatrix4fv(const std::string& uniform_name, bool transposed, const float* adr, int count = 1) {  glUniformMatrix4fv(GetUniformLocation(uniform_name), count, transposed, adr); } 
-	
+	void SetUniformMatrix2fv(const std::string& uniform_name, bool transposed, const float* adr, int count = 1) {  glUniformMatrix2fv(GetUniformLocation(uniform_name), count, transposed? GL_TRUE : GL_FALSE, adr); }
+	void SetUniformMatrix3fv(const std::string& uniform_name, bool transposed, const float* adr, int count = 1) {  glUniformMatrix3fv(GetUniformLocation(uniform_name), count, transposed? GL_TRUE : GL_FALSE, adr); }
+	void SetUniformMatrix4fv(const std::string& uniform_name, bool transposed, const float* adr, int count = 1) {  glUniformMatrix4fv(GetUniformLocation(uniform_name), count, transposed? GL_TRUE : GL_FALSE, adr); } 
 };
