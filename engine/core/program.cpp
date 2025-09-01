@@ -1,6 +1,5 @@
 #include "program.h" 
 #include "common.h"
-#include <cassert>
 #include <iostream>
 
 int program::GetUniformLocation(const std::string& uniform_name) 
@@ -64,7 +63,7 @@ void program::Link()
 		glDetachShader(_id, shader.GetId());
 		shader.Destroy();
 	}
-	//_shaders.clear();
+	_shaders.clear();
 	_linked = true;
 
 	assert(success);
