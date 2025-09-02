@@ -8,4 +8,5 @@ namespace camera
 	void Initialize(GLFWwindow* win);
 	void Update();
 	glm::mat4 GetViewMatrix();
+	glm::vec3 GetCameraPos();
 }

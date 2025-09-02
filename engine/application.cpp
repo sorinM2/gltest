@@ -1,5 +1,4 @@
 #include "application.h"
-#include "GLFW/glfw3.h"
 #include "assets/AssetsPath.h"
 #include "core/common.h"
 #include "core/program.h"
@@ -33,44 +32,44 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 }
 float vertices[] = {
--0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
--0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
--0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
--0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
--0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
--0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
--0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
--0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
--0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
--0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
--0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
--0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
--0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
--0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
--0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
--0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
--0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
--0.5f, 0.5f, -0.5f, 0.0f, 1.0f
+// positions // normals // texture coords
+-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
+0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
+-0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
+-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
+-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
+0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+-0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
+-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+-0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+-0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+-0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+-0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+-0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+-0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
+0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+-0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
+-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
 };
-
 
 int indices[] = 
 {
@@ -79,7 +78,7 @@ int indices[] =
 };
 
 glm::vec3 cubePositions[] = {
-glm::vec3( 0.0f, 0.0f, 0.0f),
+glm::vec3( 0.0f, 0.0f, -1.0f),
 glm::vec3( 2.0f, 5.0f, -15.0f),
 glm::vec3(-1.5f, -2.2f, -2.5f),
 glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -98,7 +97,7 @@ bool application::Initialize()
 		std::cout << "GLFW initialization failed!" << std::endl;
 		return false;
 	}
-
+	
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -113,6 +112,7 @@ bool application::Initialize()
 	glfwSetKeyCallback(_window, key_callback);
 	glfwMakeContextCurrent(_window);
 
+	glfwSwapInterval(0);
 	int version = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
 	glGenBuffers(1, &_VBO);
@@ -134,16 +134,20 @@ bool application::Initialize()
                             shaders::GetShadersPath() + "fragment.glsl");
         _program->Link();
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 *  sizeof(float), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 *  sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 *  sizeof(float), (void*)(sizeof(float) * 3));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 *  sizeof(float), (void*)(sizeof(float) * 3));
 	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 6));
+	glEnableVertexAttribArray(2);
 	
 	
 	stbi_set_flip_vertically_on_load(true);
 	int width, height, channels;
 	unsigned char* data = stbi_load((assets::GetAssetsPath() + "textures/fragile_box.jpg").c_str(), &width, &height, &channels, 0);
+
 	glGenTextures(1, &_texture);
 	glBindTexture(GL_TEXTURE_2D, _texture);
 
@@ -168,7 +172,7 @@ void application::Run()
 	int width, height;
 	glfwGetFramebufferSize(_window, &width, &height);
 	glViewport(0, 0, width, height);
-	glClearColor(0.8f, 0.3f, 0.3f, 1.f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 	
 	glBindVertexArray(_VAO);
 
@@ -176,7 +180,7 @@ void application::Run()
 	_program->Bind();
 
 	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(45.0f), (float )width / (float) height, 0.1f, 100.0f);
 
 	glm::mat4 view = glm::mat4(1.f);
 	view = glm::inverse(camera::GetViewMatrix());
@@ -186,8 +190,18 @@ void application::Run()
 	_program->SetUniformMatrix4fv("projection", false, glm::value_ptr(projection));
 	
 	camera::Update();
-	for ( unsigned int i = 0; i < 10; ++i )
+	for ( unsigned int i = 0; i < 2; ++i )
 	{
+		_program->SetUniform1i("isLight", 0);
+		if ( i == 1 )
+		{
+			cubePositions[i].x = sin(glfwGetTime() / 4) * 5;
+			cubePositions[i].z = cos(glfwGetTime() / 4) * 5;
+			cubePositions[i].y = sin(glfwGetTime() / 4)* cos(glfwGetTime() / 4) * 5;
+			_program->SetUniform1i("isLight", 1);
+			_program->SetUniform3fv("lightPos", glm::value_ptr(cubePositions[i]));
+			_program->SetUniform3fv("eyePos", glm::value_ptr(camera::GetCameraPos()));
+		}
 		glm::mat4 model = glm::mat4(1.f);
 		model = glm::translate(model, cubePositions[i]);
 		model = glm::rotate(model, glm::radians((float)glfwGetTime() * i), glm::vec3(1.f,1.f, 1.f));
@@ -195,6 +209,7 @@ void application::Run()
 		_program->SetUniformMatrix4fv("model", false, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
+
 	glfwSwapBuffers(_window);
 	glfwPollEvents();
 

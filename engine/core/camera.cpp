@@ -6,14 +6,11 @@
 
 namespace camera
 {
-
 GLFWwindow* window;
 glm::vec3 position;
 glm::vec2 rotation;
 
 glm::mat4 view_matrix;
-
-bool W_DOWN = false;
 
 std::unordered_map<int, bool> key_map;
 
@@ -31,10 +28,11 @@ void MouseCursorCallback(GLFWwindow* window, double xpos, double ypos)
 	rotation.y = -ypos / 10;
 }
 
+double last_time; 
 void Initialize(GLFWwindow* win)
 {
+	last_time = glfwGetTime();
 	window = win;
-
 	glfwSetKeyCallback(window, KeyCallback);
 	glfwSetCursorPosCallback(window, MouseCursorCallback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -45,10 +43,16 @@ void Initialize(GLFWwindow* win)
 	view_matrix = glm::mat4(1.f);
 }
 
-double camera_speed = 0.015;
+double camera_speed = 2;
+
 
 void Update()
 {
+	double new_time = glfwGetTime();
+	double delta = new_time - last_time;
+	
+	last_time = new_time;
+
 	glm::vec3 forward = glm::vec4(0.f, 0.f, -1.f, 1.f);
 	glm::vec3 up = glm::vec4(0.f, 1.f, 0.f, 1.f);
 
@@ -76,7 +80,13 @@ void Update()
 	else if ( key_map[GLFW_KEY_X] )
 		difference -= up;
 
-	difference *= camera_speed;
+	difference *= delta * camera_speed;
+
+	if ( key_map[GLFW_KEY_LEFT_SHIFT] )
+		difference *= 5;
+	if ( key_map[GLFW_KEY_LEFT_CONTROL] )
+		difference /= 5;
+
 	position += difference;
 }
 
@@ -89,5 +99,9 @@ glm::mat4 GetViewMatrix()
 	return view_matrix;
 }
 
+glm::vec3 GetCameraPos()
+{
+	return position;
+}
 }
 
