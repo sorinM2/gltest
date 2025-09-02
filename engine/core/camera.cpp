@@ -46,6 +46,8 @@ void Initialize(GLFWwindow* win)
 double camera_speed = 2;
 
 
+glm::vec3 forward = glm::vec4(0.f, 0.f, -1.f, 1.f);
+
 void Update()
 {
 	double new_time = glfwGetTime();
@@ -53,15 +55,14 @@ void Update()
 	
 	last_time = new_time;
 
-	glm::vec3 forward = glm::vec4(0.f, 0.f, -1.f, 1.f);
 	glm::vec3 up = glm::vec4(0.f, 1.f, 0.f, 1.f);
-
+	forward = glm::vec4(0.f, 0.f, -1.f, 1.f);
 	glm::mat4 transform = glm::mat4(1.f);
 	transform = glm::rotate(transform, glm::radians(rotation.x), glm::vec3(0.f, 1.f, 0.f));
 	transform = glm::rotate(transform, glm::radians(rotation.y), glm::vec3(1.f, 0.f, 0.f));
 	
 	up = transform * glm::vec4(up, 1.f);
-	forward = transform * glm::vec4(forward, 2.f);
+	forward = transform * glm::vec4(forward, 1.f);
 	
 	glm::vec3 difference = glm::vec3(0.f, 0.f, 0.f);
 
@@ -103,5 +104,10 @@ glm::vec3 GetCameraPos()
 {
 	return position;
 }
+
+glm::vec3 GetForward()
+{	
+	return forward;
 }
 
+}

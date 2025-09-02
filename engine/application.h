@@ -14,6 +14,7 @@ public:
 
 private:
 	unsigned int _texture;
+	unsigned int _texture_specular;
 	std::unique_ptr<program> _program;
 	unsigned int _VAO;
 	unsigned int _EBO;

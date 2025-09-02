@@ -9,4 +9,5 @@ namespace camera
 	void Update();
 	glm::mat4 GetViewMatrix();
 	glm::vec3 GetCameraPos();
+	glm::vec3 GetForward();
 }

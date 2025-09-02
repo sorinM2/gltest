@@ -146,16 +146,26 @@ bool application::Initialize()
 	
 	stbi_set_flip_vertically_on_load(true);
 	int width, height, channels;
-	unsigned char* data = stbi_load((assets::GetAssetsPath() + "textures/fragile_box.jpg").c_str(), &width, &height, &channels, 0);
+	unsigned char* data = stbi_load((assets::GetAssetsPath() + "resources/textures/container2.png").c_str(), &width, &height, &channels, 0);
 
 	glGenTextures(1, &_texture);
 	glBindTexture(GL_TEXTURE_2D, _texture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	stbi_image_free(data);
 	
+	data = stbi_load((assets::GetAssetsPath() + "resources/textures/container2_specular.png").c_str(), &width, &height, &channels, 0);
+
+	glGenTextures(1, &_texture_specular);
+	glBindTexture(GL_TEXTURE_2D, _texture_specular);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(data);
+
 	glEnable(GL_DEPTH_TEST);
 
 	camera::Initialize(_window);
@@ -189,19 +199,60 @@ void application::Run()
 	_program->SetUniformMatrix4fv("view", false, glm::value_ptr(view));
 	_program->SetUniformMatrix4fv("projection", false, glm::value_ptr(projection));
 	
+	glBindTexture(GL_TEXTURE_2D, _texture);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, _texture_specular);
+
 	camera::Update();
-	for ( unsigned int i = 0; i < 2; ++i )
+	for ( unsigned int i = 0; i < 10; ++i )
 	{
+		//directional light
+		_program->SetUniform3fv("dirLight.direction", glm::value_ptr(glm::vec3(0.3f, -1.f, 0.2f)));
+		_program->SetUniform3fv("dirLight.ambient", glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.1f)));
+		_program->SetUniform3fv("dirLight.diffuse", glm::value_ptr(glm::vec3(0.4f, 0.4f, 0.4f)));
+		_program->SetUniform3fv("dirLight.specular", glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
+
+		//point light
+		_program->SetUniform3fv("pointLight.position", glm::value_ptr(cubePositions[1]));
+		_program->SetUniform3fv("pointLight.ambient", glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.1f)));
+		_program->SetUniform3fv("pointLight.diffuse", glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
+		_program->SetUniform3fv("pointLight.specular", glm::value_ptr(glm::vec3(10.f, 10.f, 10.f)));
+
+		_program->SetUniform1f("pointLight.constant", 1.f);
+		_program->SetUniform1f("pointLight.linear", 0.022f);
+		_program->SetUniform1f("pointLight.quadratic", 0.0019f);
+		
+		//spotlight
+		_program->SetUniform3fv("spotLight.pointLight.position", glm::value_ptr(camera::GetCameraPos()));
+		_program->SetUniform3fv("spotLight.pointLight.ambient", glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.1f)));
+		_program->SetUniform3fv("spotLight.pointLight.diffuse", glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
+		_program->SetUniform3fv("spotLight.pointLight.specular", glm::value_ptr(glm::vec3(10.f, 10.f, 10.f)));
+
+		_program->SetUniform1f("spotLight.pointLight.constant", 1.f);
+		_program->SetUniform1f("spotLight.pointLight.linear", 0.022f);
+		_program->SetUniform1f("spotLight.pointLight.quadratic", 0.0019f);
+	
+		_program->SetUniform1f("spotLight.cutOff", glm::cos(glm::radians(10.f)));
+		_program->SetUniform1f("spotLight.outerCutOff", glm::cos(glm::radians(20.f)));
+		_program->SetUniform3fv("spotLight.direction", glm::value_ptr(camera::GetForward()));
+
+		_program->SetUniform3fv("eyePos", glm::value_ptr(camera::GetCameraPos()));
 		_program->SetUniform1i("isLight", 0);
 		if ( i == 1 )
 		{
-			cubePositions[i].x = sin(glfwGetTime() / 4) * 5;
-			cubePositions[i].z = cos(glfwGetTime() / 4) * 5;
-			cubePositions[i].y = sin(glfwGetTime() / 4)* cos(glfwGetTime() / 4) * 5;
+			//cubePositions[i].x = sin(glfwGetTime() / 4) * 5;
+			//cubePositions[i].z = cos(glfwGetTime() / 4) * 5;
+			//cubePositions[i].y = sin(glfwGetTime() / 4)* cos(glfwGetTime() / 4) * 5;
 			_program->SetUniform1i("isLight", 1);
-			_program->SetUniform3fv("lightPos", glm::value_ptr(cubePositions[i]));
-			_program->SetUniform3fv("eyePos", glm::value_ptr(camera::GetCameraPos()));
 		}
+		else {
+			_program->SetUniform1i("material.ambient", 0);
+			_program->SetUniform1i("material.specular", 1);
+			_program->SetUniform1f("material.diffuse", 0.5f);
+			_program->SetUniform1i("material.shininess", 1024);
+		}
+
 		glm::mat4 model = glm::mat4(1.f);
 		model = glm::translate(model, cubePositions[i]);
 		model = glm::rotate(model, glm::radians((float)glfwGetTime() * i), glm::vec3(1.f,1.f, 1.f));

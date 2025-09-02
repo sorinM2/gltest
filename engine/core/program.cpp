@@ -11,8 +11,6 @@ int program::GetUniformLocation(const std::string& uniform_name)
 
 	int location = glGetUniformLocation(_id, uniform_name.c_str());
 
-	assert(location != -1);
-
 	_uniform_cache[uniform_name] = location;
 	return location;
 }
