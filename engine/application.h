@@ -22,6 +22,4 @@ private:
 	unsigned int _VBO;
 	GLFWwindow* _window;
 	bool _finished = false;
-
-	
 };
