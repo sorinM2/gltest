@@ -92,6 +92,7 @@ glm::vec3(-1.3f, 1.0f, -1.5f)
 
 bool application::Initialize()
 {
+
 	if ( ! glfwInit() )
 	{
 		std::cout << "GLFW initialization failed!" << std::endl;
@@ -220,8 +221,8 @@ void application::Run()
 		_program->SetUniform3fv("pointLight.specular", glm::value_ptr(glm::vec3(10.f, 10.f, 10.f)));
 
 		_program->SetUniform1f("pointLight.constant", 1.f);
-		_program->SetUniform1f("pointLight.linear", 0.022f);
-		_program->SetUniform1f("pointLight.quadratic", 0.0019f);
+		_program->SetUniform1f("pointLight.linear", 0.0022f);
+		_program->SetUniform1f("pointLight.quadratic", 0.00019f);
 		
 		//spotlight
 		_program->SetUniform3fv("spotLight.pointLight.position", glm::value_ptr(camera::GetCameraPos()));
@@ -269,6 +270,7 @@ void application::Run()
 
 void application::Finalize()
 { 
+	glDeleteProgram(_program->GetId());
 	glfwTerminate();
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "core/program.h"
 #include <memory>
+
 struct GLFWwindow;
 
 class application
@@ -21,4 +22,6 @@ private:
 	unsigned int _VBO;
 	GLFWwindow* _window;
 	bool _finished = false;
+
+	
 };

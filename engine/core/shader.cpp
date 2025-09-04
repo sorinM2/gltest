@@ -17,7 +17,7 @@ shader::shader(const std::string& path, GLenum shader_type)
 
 		_id = glCreateShader(shader_type);
 		
-		glShaderSource(_id, 1, &util::unmove(buffer.str().c_str()), NULL);
+		glShaderSource(_id, 1, &utl::unmove(buffer.str().c_str()), NULL);
 		glCompileShader(_id);
 	}
 
