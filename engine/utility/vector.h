@@ -4,7 +4,7 @@
 #include <utility>
 #include <algorithm>
 #include <cstring>
-
+#include "iterator.h"
 namespace utl
 {
 
@@ -13,6 +13,7 @@ class vector
 {
 public:
 	static_assert(disable_tombstoning or sizeof(T) >= sizeof(int));
+	
 
 	vector()
 	{
@@ -101,14 +102,18 @@ public:
 		++ _size;
 	}
 
-	constexpr T* begin() const
+	constexpr decltype(auto) begin() const
 	{
-		return _data;
+		if constexpr ( !disable_tombstoning )
+			return iterator::iterator<vector, T, &vector::is_tombstone>(_data);
+		else return iterator::iterator<vector, T>(_data);
 	}
 
-	constexpr T* end() const
+	constexpr decltype(auto) end() const
 	{
-		return _data + _size;
+		if constexpr ( !disable_tombstoning )
+			return iterator::iterator<vector, T, &vector::is_tombstone>(_data + _size);
+		else return iterator::iterator<vector, T>(_data + _size);
 	}
 
 	constexpr void insert(T* position, const T& value)
@@ -379,10 +384,11 @@ public:
 		::operator delete(_data);
 	}
 
-	constexpr bool is_tombstone(T* position) const
+	constexpr bool is_tombstone(T* position)
 	{
         	static_assert(!disable_tombstoning);
-		assert(position >= _data && position < _data + _size);
+		if (position < _data or position >= _data + _size)
+			return false;
 
 		unsigned char* it = reinterpret_cast<unsigned char*>(position);
 		it += sizeof(int);
