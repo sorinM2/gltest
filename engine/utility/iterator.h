@@ -8,7 +8,12 @@ class iterator
 {
 public:
 	explicit iterator(T* ptr): _ptr{ptr} {}
-	explicit iterator(T* ptr, C* container): _ptr{ptr}, _container{container} {}
+	explicit iterator(T* ptr, C* container): _ptr{ptr}, _container{container} 
+	{
+		if constexpr (comp)
+			while((_container->*comp)(_ptr))
+				++_ptr;
+	}
 
 	iterator operator++(int)
 	{

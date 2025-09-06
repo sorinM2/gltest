@@ -4,6 +4,7 @@
 #include <utility>
 #include <algorithm>
 #include <cstring>
+#include <memory>
 #include "iterator.h"
 namespace utl
 {
@@ -102,22 +103,23 @@ public:
 		++ _size;
 	}
 
-	constexpr decltype(auto) begin() const
+	constexpr decltype(auto) begin()
 	{
 		if constexpr ( !disable_tombstoning )
-			return iterator::iterator<vector, T, &vector::is_tombstone>(_data);
+			return iterator::iterator<vector, T, &vector::is_tombstone>(_data, this);
 		else return iterator::iterator<vector, T>(_data);
 	}
 
-	constexpr decltype(auto) end() const
+	constexpr decltype(auto) end()
 	{
 		if constexpr ( !disable_tombstoning )
-			return iterator::iterator<vector, T, &vector::is_tombstone>(_data + _size);
+			return iterator::iterator<vector, T, &vector::is_tombstone>(_data + _size, this);
 		else return iterator::iterator<vector, T>(_data + _size);
 	}
 
 	constexpr void insert(T* position, const T& value)
 	{
+		static_assert(disable_tombstoning);
 		emplace(position, value);
 	}
 
@@ -134,15 +136,14 @@ public:
 		controlled_reserve(_size + spaces);
 
 		position = begin() + offset;
-
+		
 		for ( T* it = end() + spaces - 1; it >= position + spaces; --it )
 		{
 			new (it) T(std::move(*(it - spaces)));
 			(it - spaces)->~T();
-		}
+		}				
 
-		for ( unsigned int inc = 0; inc < spaces; ++inc )
-			new (position + inc) T(*(range_start + inc));
+		std::copy(range_start, range_end, position);
 
 		_size += spaces;
 	}
@@ -151,6 +152,7 @@ public:
 	template<typename... Targs>
 	constexpr void emplace(T* position, Targs&&... args)
 	{
+		static_assert(disable_tombstoning);
 		assert(position >= begin() && position <= end() );
 
 		unsigned int offset = position - begin();
@@ -161,19 +163,10 @@ public:
 
 		for ( T* it = end(); it > position; --it )
 		{
-			if constexpr (disable_tombstoning)
-			{
-				new (it) T(std::move(*(it - 1)));
-				(it - 1)->~T();
-			}
-			else if ( !is_tombstone(it - 1) )
-			{
-				new (it) T(std::move(*(it - 1)));
-				(it - 1)->~T();
-			}
-			else memset(it, _tombstone_character, sizeof(T));
-			
+			new (it) T(std::move(*(it - 1)));
+			(it - 1)->~T();
 		}
+
 		new (position) T(std::forward<Targs>(args)...);
 
 		++ _size;
@@ -188,12 +181,14 @@ public:
 			emplace_back(std::forward<Targs>(args)...);
 			return _size - 1;
 		}
+
 		T* position = _data + _first_tombstone;
 		assert(is_tombstone(position));
+		
+		*(_is_tombstone + _first_tombstone) = false;
 
 		_first_tombstone = *reinterpret_cast<int*>(position);
 
-		-- _tombstones;
 		new (position) T(std::forward<Targs>(args)...);
 
 		return position - _data;
@@ -212,21 +207,22 @@ public:
 
 		unsigned int spaces = range_end - range_start;
 		unsigned int spaces_to_move = end() - range_end;
+		
+		if constexpr ( disable_tombstoning )
+		{
+			std::move(range_end, static_cast<T*>(end()), range_start);
 
-		for ( T* it = range_start; it < range_end; ++it )
-        		if constexpr (disable_tombstoning)
-			    it->~T();
-        		else if ( !is_tombstone(it) )
-			{
-			    it->~T();
-			    mark_as_tombstone(it);
-			}
+			for ( T* it = end() - spaces; it != end(); ++it )
+				it->~T();
 
-		if constexpr (disable_tombstoning){
-			    for ( unsigned int inc = 0; inc < spaces_to_move; ++inc )
-				    new (range_start + inc) T(std::move(*(range_end + inc)));
-			    _size -= spaces;
+			_size -= spaces;
 		}
+		else for ( T* it = range_start; it < range_end; ++it )
+			if ( !is_tombstone(it) )
+			{
+				it->~T();
+				mark_as_tombstone(it);
+			}
 	}
 
 	constexpr void controlled_reserve(unsigned int needed_capacity)
@@ -241,54 +237,34 @@ public:
 			return;
 
 		T* new_buffer = reinterpret_cast<T*>(::operator new(new_capacity * sizeof(T)));
-
-		unsigned int tombstone_counter = 0;
-
-		for ( unsigned int inc = 0; inc < _size; ++inc )
+		
+		if constexpr (disable_tombstoning)
 		{
-			if constexpr (disable_tombstoning)
-			{
-			    new (new_buffer + inc) T(std::move(*(_data + inc)));
-			    (_data + inc)->~T();
-			}
-			else if ( !is_tombstone(_data + inc) )
+			std::uninitialized_move(_data, _data + _size, new_buffer);
+
+			if constexpr ( !std::is_trivially_destructible_v<T> )
+				for ( unsigned int inc = 0; inc < _size; ++inc )
+					(_data + inc)->~T();
+		}
+		else if constexpr ( std::is_trivially_copyable_v<T> == true)
+			memcpy(new_buffer, _data, _size * sizeof(T));
+		else for ( unsigned int inc = 0; inc < _size; ++inc )
+			if ( !is_tombstone(_data + inc) )
 			{
 				new (new_buffer + inc) T(std::move(*(_data + inc)));
 				(_data + inc)->~T();
 			} 
-			else
-			{
-				memset(new_buffer + inc, _tombstone_character, sizeof(T));
-				++ tombstone_counter;
-			}
-		}
-
 		if constexpr ( !disable_tombstoning )
 		{
-			assert(tombstone_counter >= _tombstones);
-			while ( tombstone_counter > _tombstones )
-			{
-				unsigned char last_tombstone_character = _tombstone_character;
-				tombstone_failsafe();
-				std::swap(_tombstone_character, last_tombstone_character);
-
-				for ( unsigned int inc = 0; inc < _size; ++inc )
-					if ( is_tombstone(_data + inc) )
-					{
-						new (new_buffer + inc) T(std::move(*(_data + inc)));
-						(_data + inc)->~T();
-					}
-
-				std::swap(_tombstone_character, last_tombstone_character);
-				
-				tombstone_counter = 0;
-				for ( unsigned int inc = 0; inc < _size; ++inc )
-					if ( is_tombstone(_data + inc) )
-						++ tombstone_counter;
-			}
+			bool* new_graveyard = reinterpret_cast<bool*>(::operator new(new_capacity * sizeof(bool)));
+			memset(new_graveyard, 0, new_capacity * sizeof(bool));
+			memcpy(new_graveyard, _is_tombstone, _size * sizeof(bool));
+			::operator delete(_is_tombstone);
+			_is_tombstone = new_graveyard;
 		}
 
 		::operator delete(_data);
+
 		_data = new_buffer;
 		_capacity = new_capacity;
 		
@@ -328,12 +304,6 @@ public:
 		return _data;
 	}
 
-	constexpr unsigned int tombstones() const 
-	{
-		static_assert(!disable_tombstoning);
-		return _tombstones;
-	}
-
 	constexpr void clear()
 	{
 		if ( !_capacity )
@@ -346,6 +316,7 @@ public:
 				c.~T();
 		
 		::operator delete(_data);
+		::operator delete(_is_tombstone);
 		_data = nullptr;
 		_size = _capacity = 0;
 
@@ -380,7 +351,8 @@ public:
 			    if ( !is_tombstone(value) )
 				    value->~T();
 			}
-
+		
+		::operator delete(_is_tombstone);
 		::operator delete(_data);
 	}
 
@@ -390,54 +362,26 @@ public:
 		if (position < _data or position >= _data + _size)
 			return false;
 
-		unsigned char* it = reinterpret_cast<unsigned char*>(position);
-		it += sizeof(int);
-		for ( unsigned int inc = 0; inc < sizeof(T) - sizeof(int); ++ inc )
-			if ( *(it + inc) != _tombstone_character )
-				return false;
-		return true;
+		unsigned int offset = position - _data;
+		return *(_is_tombstone + offset);
 	}
 
 	constexpr void mark_as_tombstone(T* position)
 	{
 	    	static_assert(!disable_tombstoning);
+		assert(position >= _data && position < _data + _size);
 
-		if constexpr (!disable_tombstoning )
-		{
-			assert(position >= _data && position < _data + _size);
-
-			*reinterpret_cast<int*>(position) = _first_tombstone;
-			_first_tombstone = position - _data;
-			memset(reinterpret_cast<unsigned char*>(position) + sizeof(int), _tombstone_character, sizeof(T) - sizeof(int));
-
-			++ _tombstones;
-		}
+		*reinterpret_cast<int*>(position) = _first_tombstone;
+		_first_tombstone = position - _data;
+		*(_is_tombstone + _first_tombstone) = true;	
 	}
-private:
-	constexpr void tombstone_failsafe()
-	{
-		static_assert(!disable_tombstoning);
-		if constexpr (!disable_tombstoning)
-		{
- 			++ _tombstone_character;
-			int next_tombstone = _first_tombstone;
-			while ( next_tombstone >= 0 and next_tombstone < _size)
-			{
-				T* position = _data + next_tombstone;
-				memset(position + 1, _tombstone_character, sizeof(T) - sizeof(int));
-				next_tombstone = *reinterpret_cast<int*>(position);
-			}
-		}
-	}
-
 private:
 	T* _data = nullptr;
 	unsigned int _size = 0;
 	unsigned int _capacity = 0;
-	
-	unsigned int _tombstones = 0;
+
+	bool* _is_tombstone = nullptr;
 	int _first_tombstone = -1;
-	unsigned char _tombstone_character = 'a';
 };
 
 }
