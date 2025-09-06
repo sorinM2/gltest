@@ -1,7 +1,8 @@
 #include "program.h" 
-#include "common.h"
+#include "core/common.h"
 #include <iostream>
 
+namespace programs {
 int program::GetUniformLocation(const std::string& uniform_name) 
 {
 	Bind();
@@ -10,7 +11,8 @@ int program::GetUniformLocation(const std::string& uniform_name)
 		return map_location->second;
 
 	int location = glGetUniformLocation(_id, uniform_name.c_str());
-
+	if ( location == -1 )
+		std::cout << "Could not find uniform: " << uniform_name << std::endl;
 	_uniform_cache[uniform_name] = location;
 	return location;
 }
@@ -73,4 +75,5 @@ void program::Bind()
 	assert(_linked == true);
 	assert( _id != 0 );
 	glUseProgram(_id);
+}
 }

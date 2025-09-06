@@ -1,9 +1,12 @@
 #pragma once
 #include "core/common.h"
-#include "core/shader.h"
+#include "shader.h"
 #include <unordered_map>
 #include <string>
-#include <vector>
+#include "utility/vector.h"
+
+namespace programs 
+{
 
 class program 
 {
@@ -28,7 +31,7 @@ private:
 	bool _linked = false;
 	unsigned int _id = 0;
 	std::unordered_map<std::string, int>_uniform_cache;
-	std::vector<shader> _shaders;
+	utl::vector<shader> _shaders;
 public:
 	void SetUniform1f(const std::string& uniform_name, float _1) { glUniform1f( GetUniformLocation(uniform_name), _1); }
 	void SetUniform2f(const std::string& uniform_name, float _1, float _2) { glUniform2f(GetUniformLocation(uniform_name), _1, _2); }
@@ -65,3 +68,5 @@ public:
 	void SetUniformMatrix3fv(const std::string& uniform_name, bool transposed, const float* adr, int count = 1) {  glUniformMatrix3fv(GetUniformLocation(uniform_name), count, transposed? GL_TRUE : GL_FALSE, adr); }
 	void SetUniformMatrix4fv(const std::string& uniform_name, bool transposed, const float* adr, int count = 1) {  glUniformMatrix4fv(GetUniformLocation(uniform_name), count, transposed? GL_TRUE : GL_FALSE, adr); } 
 };
+
+}

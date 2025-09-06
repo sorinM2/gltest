@@ -1,7 +1,7 @@
 #pragma once
-#include "core/program.h"
+#include "shaders/program.h"
 #include <memory>
-
+#include "lights/PointLight.h"
 struct GLFWwindow;
 
 class application
@@ -16,10 +16,13 @@ public:
 private:
 	unsigned int _texture;
 	unsigned int _texture_specular;
-	std::unique_ptr<program> _program;
+	programs::program* _program;
 	unsigned int _VAO;
 	unsigned int _EBO;
 	unsigned int _VBO;
 	GLFWwindow* _window;
 	bool _finished = false;
+
+	lights::PointLight light1;
+	lights::PointLight light2;
 };

@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "common.h"
+#include "core/common.h"
 
 class shader 
 {

@@ -1,7 +1,7 @@
 #include "application.h"
 #include "assets/AssetsPath.h"
 #include "core/common.h"
-#include "core/program.h"
+#include "shaders/ProgramManager.h"
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
@@ -92,7 +92,6 @@ glm::vec3(-1.3f, 1.0f, -1.5f)
 
 bool application::Initialize()
 {
-
 	if ( ! glfwInit() )
 	{
 		std::cout << "GLFW initialization failed!" << std::endl;
@@ -127,12 +126,14 @@ bool application::Initialize()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	std::cout << "Shader path: " << shaders::GetShadersPath() << std::endl;
+	
+	unsigned int prog = programs::AddProgram();
+        _program = programs::GetProgram(prog);
 
-        _program = std::make_unique<program>();
-        _program->AddShader(program::VERTEX,
-                            shaders::GetShadersPath() + "vertex.glsl");
-        _program->AddShader(program::FRAGMENT,
-                            shaders::GetShadersPath() + "fragment.glsl");
+        _program->AddShader(programs::program::VERTEX,
+                            shaders::GetShadersPath() + "src/vertex.glsl");
+        _program->AddShader(programs::program::FRAGMENT,
+                            shaders::GetShadersPath() + "src/fragment.glsl");
         _program->Link();
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 *  sizeof(float), (void*)0);
@@ -171,6 +172,19 @@ bool application::Initialize()
 
 	camera::Initialize(_window);
 
+	light1.initialize(0);
+	light1.set_position(cubePositions[1]);
+	light1.set_ambient( glm::vec3(0.1f, 0.1f, 0.1f));
+	light1.set_diffuse(glm::vec3(0.5f, 0.5f, 0.5f));
+	light1.set_specular(glm::vec3(10.f, 10.f, 10.f));
+	light1.add_to_program(prog);
+
+	light2.initialize(1);
+	light2.set_position(cubePositions[0]);
+	light2.set_ambient( glm::vec3(0.f, 0.f, 0.f));
+	light2.set_diffuse(glm::vec3(0.5f, 0.5f, 0.5f));
+	light2.set_specular(glm::vec3(2.f, 2.f, 2.f));
+	light2.add_to_program(prog);
 	return true;
 }
 
@@ -208,39 +222,9 @@ void application::Run()
 	camera::Update();
 	for ( unsigned int i = 0; i < 10; ++i )
 	{
-		//directional light
-		_program->SetUniform3fv("dirLight.direction", glm::value_ptr(glm::vec3(0.3f, -1.f, 0.2f)));
-		_program->SetUniform3fv("dirLight.ambient", glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.1f)));
-		_program->SetUniform3fv("dirLight.diffuse", glm::value_ptr(glm::vec3(0.4f, 0.4f, 0.4f)));
-		_program->SetUniform3fv("dirLight.specular", glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
-
-		//point light
-		_program->SetUniform3fv("pointLight.position", glm::value_ptr(cubePositions[1]));
-		_program->SetUniform3fv("pointLight.ambient", glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.1f)));
-		_program->SetUniform3fv("pointLight.diffuse", glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
-		_program->SetUniform3fv("pointLight.specular", glm::value_ptr(glm::vec3(10.f, 10.f, 10.f)));
-
-		_program->SetUniform1f("pointLight.constant", 1.f);
-		_program->SetUniform1f("pointLight.linear", 0.0022f);
-		_program->SetUniform1f("pointLight.quadratic", 0.00019f);
-		
-		//spotlight
-		_program->SetUniform3fv("spotLight.pointLight.position", glm::value_ptr(camera::GetCameraPos()));
-		_program->SetUniform3fv("spotLight.pointLight.ambient", glm::value_ptr(glm::vec3(0.1f, 0.1f, 0.1f)));
-		_program->SetUniform3fv("spotLight.pointLight.diffuse", glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
-		_program->SetUniform3fv("spotLight.pointLight.specular", glm::value_ptr(glm::vec3(10.f, 10.f, 10.f)));
-
-		_program->SetUniform1f("spotLight.pointLight.constant", 1.f);
-		_program->SetUniform1f("spotLight.pointLight.linear", 0.022f);
-		_program->SetUniform1f("spotLight.pointLight.quadratic", 0.0019f);
-	
-		_program->SetUniform1f("spotLight.cutOff", glm::cos(glm::radians(10.f)));
-		_program->SetUniform1f("spotLight.outerCutOff", glm::cos(glm::radians(20.f)));
-		_program->SetUniform3fv("spotLight.direction", glm::value_ptr(camera::GetForward()));
-
 		_program->SetUniform3fv("eyePos", glm::value_ptr(camera::GetCameraPos()));
 		_program->SetUniform1i("isLight", 0);
-		if ( i == 1 )
+		if ( i == 1 or i == 0 )
 		{
 			//cubePositions[i].x = sin(glfwGetTime() / 4) * 5;
 			//cubePositions[i].z = cos(glfwGetTime() / 4) * 5;

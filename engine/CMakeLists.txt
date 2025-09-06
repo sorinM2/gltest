@@ -5,10 +5,13 @@ add_executable(engine ../glad/src/glad.c
 		main.cpp
 		shaders/ShadersPath.cpp
 		application.cpp
-		core/shader.cpp
-		core/program.cpp
+		shaders/shader.cpp
+		shaders/program.cpp
+		shaders/ProgramManager.cpp
 		assets/AssetsPath.cpp
-		core/camera.cpp)
+		core/camera.cpp
+		lights/PointLight.cpp
+)
 
 
 target_include_directories(engine PUBLIC ../glfw/include/)
