@@ -1,13 +1,84 @@
-#include "PointLight.h"
+#include "point_light.h"
 #include "managers/ProgramManager.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "utility/vector.h"
+#include "ECS/components/transform.h"
 #include <iostream>
-namespace lights
+#include "ECS/entity.h"
+
+namespace ecs::components::point_light
 {
+	namespace{
+		utl::vector<point_light, false> point_lights;
+		utl::vector<unsigned int> generations;  
+	}
 
-std::string PointLight::shader_array_name = "pointLights";
+point_light_id create_point_light(entity::entity* entity)
+{
+	unsigned int index = point_lights.emplace_tombstone(entity);
+	point_lights[index].initialize(index);
 
-std::string PointLight::get_uniform_name(const std::string& var_name) const 
+   	if ( point_lights.size() > generations.size() )
+		generations.emplace_back(0);
+	point_light_id id = id::set_generation(index, generations[index]); 
+	#ifdef _DEBUG
+	std::cout << "created point_light with generation: " << id::generation(id) << ", and index: " << id::index(id) << std::endl;
+	#endif
+
+	return id;
+}
+
+void delete_point_light(point_light_id id)
+{
+	assert(id::generation(id) == generations[id::index(id)]);
+	#ifdef _DEBUG
+	std::cout << "deleted point_light with generation: " << id::generation(id) << ", and index: " << id::index(id) << std::endl;
+	#endif
+	
+	std::cout << "debug" << ++generations[id::index(id)] << std::endl;
+	point_lights.erase(point_lights.begin() + id::index(id));
+}
+
+point_light* get_point_light(point_light_id id )
+{
+	assert(id::generation(id) == generations[id::index(id)]);
+
+	return &point_lights[id::index(id)];
+}
+
+bool is_valid(point_light_id id)
+{
+	assert(id::is_valid(id));
+	return id::generation(id) == generations[id::index(id)];
+}
+
+void update()
+{
+	for ( auto& light : point_lights )
+		light.update();
+}
+
+point_light::point_light(entity::entity* entity): _entity{entity}{
+	_transform = _entity->get_transform();
+}
+
+void point_light::initialize(point_light_id id)
+{
+	assert(id::is_valid(id));
+	_id = id;
+}
+
+void point_light::update()
+{
+	_transform = _entity->get_transform();
+	glm::vec3 tranform_position = _transform->get_position();
+	if ( tranform_position != _position )
+		set_position(tranform_position);
+}
+
+std::string point_light::shader_array_name = "pointLights";
+
+std::string point_light::get_uniform_name(const std::string& var_name) const 
 {
 	std::string struct_name = "";
 	if ( parent_light == "" )
@@ -16,7 +87,7 @@ std::string PointLight::get_uniform_name(const std::string& var_name) const
 	return struct_name + var_name;
 }
 
-void PointLight::internal_update_program(unsigned int id)
+void point_light::internal_update_program(unsigned int id)
 {
 	std::string position_name = get_uniform_name("position");
 	std::string ambient_name = get_uniform_name("ambient");
@@ -41,13 +112,13 @@ void PointLight::internal_update_program(unsigned int id)
 
 }
 
-void PointLight::update_programs()
+void point_light::update_programs()
 {
 	for ( auto program : _programs )
 		internal_update_program(program);
 }
 
-void PointLight::add_to_program(unsigned int id)
+void point_light::add_to_program(unsigned int id)
 {
 	std::string active_name = get_uniform_name("is_active");
 	programs::program* prog = programs::GetProgram(id);
@@ -57,7 +128,7 @@ void PointLight::add_to_program(unsigned int id)
 	internal_update_program(id);
 }
 
-void PointLight::remove_from_program(unsigned int id)
+void point_light::remove_from_program(unsigned int id)
 {
 	std::string active_name = get_uniform_name("is_active");
 	programs::program* prog = programs::GetProgram(id);
@@ -66,7 +137,7 @@ void PointLight::remove_from_program(unsigned int id)
 }
 	
 
-void PointLight::set_position(const glm::vec3& position)
+void point_light::set_position(const glm::vec3& position)
 {
 	_position = position; 
 	std::string position_name = get_uniform_name("position");
@@ -78,7 +149,7 @@ void PointLight::set_position(const glm::vec3& position)
 	}
 }
 
-void PointLight::set_ambient(const glm::vec3& ambient) 
+void point_light::set_ambient(const glm::vec3& ambient) 
 {
 	_ambient = ambient;
 	std::string ambient_name = get_uniform_name("ambient");
@@ -89,7 +160,7 @@ void PointLight::set_ambient(const glm::vec3& ambient)
 	}
 }
 
-void PointLight::set_diffuse(const glm::vec3& diffuse) 
+void point_light::set_diffuse(const glm::vec3& diffuse) 
 {
 	_diffuse = diffuse; 
 	std::string diffuse_name = get_uniform_name("diffuse");
@@ -100,7 +171,7 @@ void PointLight::set_diffuse(const glm::vec3& diffuse)
 	}
 }
 
-void PointLight::set_specular(const glm::vec3& specular) 
+void point_light::set_specular(const glm::vec3& specular) 
 {
 	_specular = specular; 
 	std::string specular_name = get_uniform_name("specular");
@@ -111,7 +182,7 @@ void PointLight::set_specular(const glm::vec3& specular)
 	}
 }
 
-void PointLight::set_constant(const float& constant) 
+void point_light::set_constant(const float& constant) 
 {
 	_constant = constant; 
 	std::string constant_name = get_uniform_name("constant");
@@ -122,7 +193,7 @@ void PointLight::set_constant(const float& constant)
 	}
 }
 
-void PointLight::set_linear(const float& linear) 
+void point_light::set_linear(const float& linear) 
 {
 	_linear = linear; 
 	std::string linear_name = get_uniform_name("linear");
@@ -133,7 +204,7 @@ void PointLight::set_linear(const float& linear)
 	}
 }
 
-void PointLight::set_quadratic(const float& quadratic) 
+void point_light::set_quadratic(const float& quadratic) 
 {
 	_quadratic = quadratic; 
 	std::string quadratic_name = get_uniform_name("quadratic");
@@ -144,7 +215,7 @@ void PointLight::set_quadratic(const float& quadratic)
 	}
 }
 
-void PointLight::set_active(bool value)
+void point_light::set_active(bool value)
 {
 	_active = value;
 	std::string active_name = get_uniform_name("is_active");

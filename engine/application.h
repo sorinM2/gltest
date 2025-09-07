@@ -5,7 +5,6 @@
 #include <memory>
 #include "ECS/entity.h"
 
-#include "lights/PointLight.h"
 struct GLFWwindow;
 
 class application
@@ -27,8 +26,6 @@ private:
 	GLFWwindow* _window;
 	bool _finished = false;
 	
-	ecs::entity_id entt;
+	ecs::entity::entity_id entt;
 
-	lights::PointLight light1;
-	lights::PointLight light2;
 };

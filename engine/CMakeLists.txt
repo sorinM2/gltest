@@ -10,7 +10,7 @@ add_executable(engine ../glad/src/glad.c
 		managers/ProgramManager.cpp
 		assets/AssetsPath.cpp
 		core/camera.cpp
-		lights/PointLight.cpp
+		ECS/components/lights/point_light.cpp
 		ECS/components/transform.cpp
 		ECS/ecs.cpp
 		ECS/entity.cpp

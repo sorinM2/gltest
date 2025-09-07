@@ -171,26 +171,28 @@ bool application::Initialize()
 	glEnable(GL_DEPTH_TEST);
 
 	camera::Initialize(_window);
-
-	light1.initialize(0);
-	light1.set_position(cubePositions[1]);
-	light1.set_ambient( glm::vec3(0.1f, 0.1f, 0.1f));
-	light1.set_diffuse(glm::vec3(0.5f, 0.5f, 0.5f));
-	light1.set_specular(glm::vec3(10.f, 10.f, 10.f));
-	light1.add_to_program(prog);
-
-	light2.initialize(1);
-	light2.set_position(cubePositions[0]);
-	light2.set_ambient( glm::vec3(0.f, 0.f, 0.f));
-	light2.set_diffuse(glm::vec3(0.5f, 0.5f, 0.5f));
-	light2.set_specular(glm::vec3(2.f, 2.f, 2.f));
-	light2.add_to_program(prog);
-
-	light2.set_active(false);
-//	glEnable(GL_CULL_FACE);
-//	glCullFace(GL_BACK);
-	//
+	
+		
 	entt = ecs::create_entity();
+	ecs::entity::entity* _entity = ecs::get_entity(entt);
+
+	_entity->create_point_light();
+	
+	ecs::remove_entity(entt);
+
+	entt = ecs::create_entity();
+	_entity = ecs::get_entity(entt);
+
+	_entity->create_point_light();
+
+	ecs::components::point_light::point_light* point = _entity->get_point_light();
+
+	point->set_ambient( glm::vec3(0.1f, 0.1f, 0.1f));
+	point->set_diffuse(glm::vec3(0.5f, 0.5f, 0.5f));
+	point->set_specular(glm::vec3(10.f, 10.f, 10.f));
+	point->add_to_program(prog);
+
+
 	return true;
 }
 
@@ -203,10 +205,9 @@ void application::Run()
 	cubePositions[0].z = cos(glfwGetTime() / 4) * 5;
 	cubePositions[0].y = sin(glfwGetTime() / 4)* cos(glfwGetTime() / 4) * 5;
 
-	light1.set_position(cubePositions[0]);
-	ecs::entity* _entity = ecs::get_entity(entt);
+	ecs::entity::entity* _entity = ecs::get_entity(entt);
 	_entity->get_transform()->set_position(cubePositions[0]);
-
+	ecs::update();
 	int width, height;
 	glfwGetFramebufferSize(_window, &width, &height);
 	glViewport(0, 0, width, height);

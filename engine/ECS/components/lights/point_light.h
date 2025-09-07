@@ -1,17 +1,28 @@
 #pragma once 
 #include "core/GLCommon.h"
-#include "utility/vector.h"
 #include <string>
 #include <unordered_set>
-namespace lights 
+
+namespace ecs::entity 
+{
+class entity;
+}
+
+namespace ecs::components::transform 
+{
+class transform;
+}
+
+namespace ecs::components::point_light 
 {
 
-class PointLight 
+class point_light 
 {
 public:
-	PointLight() = default;
+	point_light(entity::entity* entity); 
+	void initialize(point_light_id id);
+	void update();
 
-	void initialize(unsigned int id) { _id = id; }
 
 	void add_to_program(unsigned int id);
 	void remove_from_program(unsigned int id);
@@ -41,10 +52,13 @@ private:
 	std::string get_uniform_name(const std::string& var_name) const;
 	void internal_update_program(unsigned int id);
 private:
+	entity::entity* _entity;
+	transform::transform* _transform;
+
+	point_light_id _id{id::invalid_id};
 	std::string parent_light = "";	
 	static std::string shader_array_name;
 
-	unsigned int _id; 
 	std::unordered_set<unsigned int> _programs;
 
 	glm::vec3 _position{0., 0.f, 0.f};
@@ -59,4 +73,10 @@ private:
 	bool _active{true};
 };
 
+point_light_id create_point_light(entity::entity* entity);
+void delete_point_light(point_light_id id);
+point_light* get_point_light(point_light_id id);
+
+bool is_valid(point_light_id id);
+void update();
 }

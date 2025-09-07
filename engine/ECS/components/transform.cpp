@@ -1,10 +1,65 @@
 #include "transform.h"
 #include "glm/gtc/matrix_transform.hpp"
-namespace ecs::components
+#include "utility/vector.h"
+#include <iostream>
+
+namespace ecs::components::transform
 {
+	namespace {
+		utl::vector<transform, false, 1024> transforms;
+		utl::vector<unsigned int> generations;  
+	}
+
+transform_id create_transform(entity::entity* entity)
+{
+	unsigned int index = transforms.emplace_tombstone(entity);
+   	if ( transforms.size() > generations.size() )
+		generations.emplace_back(0);
+
+	transform_id id = id::set_generation(index, generations[index]); 	
+	
+	#ifdef _DEBUG
+	std::cout << "created transform with generation: " << id::generation(id) << ", and index: " << id::index(id) << std::endl;
+	#endif
+
+	return id;
+}
+
+void delete_transform(transform_id id)
+{
+	assert( id::generation(id) < generations.size());
+	assert(id::generation(id) == generations[id::index(id)]);
+	#ifdef _DEBUG
+	std::cout << "deleted transform with generation: " << id::generation(id) << ", and index: " << id::index(id) << std::endl;
+	#endif
+	transforms.erase(transforms.begin() + id::index(id));
+	++generations[id::index(id)];
+}
+
+bool is_valid(transform_id id)
+{
+	assert(id::is_valid(id));
+	return id::generation(id) == generations[id::index(id)];
+}
+
+transform* get_transform(transform_id id )
+{
+	assert(id::generation(id) == generations[id::index(id)]);
+
+	return &transforms[id::index(id)];
+}
+
+transform::transform(entity::entity* entity)
+{
+	_position_vec = glm::vec3(0.f);
+	_position = glm::mat4(1.f);
+	_rotation = glm::mat4(1.f);
+	_scale = glm::mat4(1.f);
+}
 
 void transform::set_position(const glm::vec3& position)
 {
+	_position_vec = position;
 	_position = glm::translate(glm::mat4(1.f), position); 
 
 	update_model();
@@ -29,20 +84,6 @@ void transform::set_scale(const glm::vec3& scale)
 void transform::update_model()
 {
 	_model = _position * _rotation * _scale;
-}
-
-transform::transform(entity* entity) : _entity{entity} { }
-
-void transform::create()
-{
-	assert(!_active);
-	if ( _active) return;
-
-	_position = glm::mat4(1.f);
-	_rotation = glm::mat4(1.f);
-	_scale = glm::mat4(1.f);
-
-	_active = true;
 }
 
 }

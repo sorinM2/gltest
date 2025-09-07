@@ -2,7 +2,7 @@
 #include <cassert>
 #include "primitive_types.h"
 #include <type_traits>
-
+#include <iostream>
 namespace id 
 {
 using id_type = u32;
@@ -23,7 +23,7 @@ constexpr bool is_valid(id_type id)
 constexpr id_type generation(id_type id) 
 {
 	assert(is_valid(id));
-	return id & generation_mask;
+	return (id & generation_mask) >> index_bits;
 }
 
 constexpr id_type index(id_type id)
@@ -32,13 +32,12 @@ constexpr id_type index(id_type id)
 	return id & index_mask;
 }
 
-constexpr id_type set_generation(id_type id, unsigned int generation)
+constexpr id_type set_generation(id_type id, unsigned int gen)
 {
 	assert(is_valid(id));
 	id_type ind = index(id);
-	id = generation;
+	id = gen;
 	id = (id << index_bits) | ind;
-
 	return id;
 }
 
