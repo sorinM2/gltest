@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "core/GLCommon.h"
 #include "core/common.h"
 
 class shader 

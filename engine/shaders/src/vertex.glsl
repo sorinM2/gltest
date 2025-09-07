@@ -8,15 +8,14 @@ out vec2 texCoord;
 out vec3 normal;
 out vec3 position;
 
-uniform mat4 projection;
-uniform mat4 view;
+uniform mat4 projection_view;
 uniform mat4 model;
 
 void main()
 {
 	texCoord = aTexCoord;
 	position = vec3(model * vec4(aPos, 1.f));
-	gl_Position = projection * view * vec4(position, 1.0);
+	gl_Position = projection_view * vec4(position, 1.0);
 	normal = mat3(transpose(inverse(model))) * aNormal;
 	
 }

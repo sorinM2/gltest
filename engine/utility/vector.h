@@ -9,10 +9,11 @@
 namespace utl
 {
 
-template<typename T, bool disable_tombstoning = true>
+template<typename T, bool disable_tombstoning = true,unsigned int _min_tombstones = 0>
 class vector
 {
 public:
+	static_assert(_min_tombstones < 1e16 + 1, "Number of needed tombstones is too big!");
 	static_assert(disable_tombstoning or sizeof(T) >= sizeof(int));
 	
 
@@ -176,7 +177,7 @@ public:
 	unsigned int emplace_tombstone(Targs&&... args)
 	{
 		static_assert(!disable_tombstoning);
-		if ( _first_tombstone < 0 or _first_tombstone >= _size)
+		if ( _first_tombstone < 0 or _first_tombstone >= _size or _tombstones < _min_tombstones)
 		{
 			emplace_back(std::forward<Targs>(args)...);
 			return _size - 1;
@@ -190,6 +191,8 @@ public:
 		_first_tombstone = *reinterpret_cast<int*>(position);
 
 		new (position) T(std::forward<Targs>(args)...);
+		
+		-- _tombstones;
 
 		return position - _data;
 	}
@@ -328,7 +331,7 @@ public:
 	constexpr T& operator[]( unsigned int pos)
 	{
 		assert(pos >= 0 && pos < _size );
-		if ( !disable_tombstoning )
+		if constexpr ( !disable_tombstoning )
 			assert(!is_tombstone(_data + pos));
 		return *(_data + pos);
 	}
@@ -336,7 +339,7 @@ public:
 	constexpr const T& operator[](unsigned int pos) const
 	{
 		assert(pos >= 0 && pos < _size );
-		if ( !disable_tombstoning )
+		if constexpr ( !disable_tombstoning )
 			assert(!is_tombstone(_data + pos));
 		return *(_data + pos);
 	}
@@ -374,6 +377,7 @@ public:
 		*reinterpret_cast<int*>(position) = _first_tombstone;
 		_first_tombstone = position - _data;
 		*(_is_tombstone + _first_tombstone) = true;	
+		++_tombstones;
 	}
 private:
 	T* _data = nullptr;
@@ -382,6 +386,7 @@ private:
 
 	bool* _is_tombstone = nullptr;
 	int _first_tombstone = -1;
+	unsigned int _tombstones = 0;
 };
 
 }

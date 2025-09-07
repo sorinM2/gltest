@@ -1,9 +1,8 @@
 #pragma once
-
-#define GLAD_GL_IMPLEMENTATION
-#include "glad/glad.h"
-
-#include "GLFW/glfw3.h"
+#include <cstdint>
 
 #include <cassert>
+
+#include "primitive_types.h"
+#include "id.h"
 

@@ -1,6 +1,10 @@
 #pragma once
 #include "shaders/program.h"
+#include "core/GLCommon.h"
+#include "core/common.h"
 #include <memory>
+#include "ECS/entity.h"
+
 #include "lights/PointLight.h"
 struct GLFWwindow;
 
@@ -22,6 +26,8 @@ private:
 	unsigned int _VBO;
 	GLFWwindow* _window;
 	bool _finished = false;
+	
+	ecs::entity_id entt;
 
 	lights::PointLight light1;
 	lights::PointLight light2;

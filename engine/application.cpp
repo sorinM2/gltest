@@ -1,17 +1,17 @@
 #include "application.h"
 #include "assets/AssetsPath.h"
 #include "core/common.h"
-#include "shaders/ProgramManager.h"
+#include "core/GLCommon.h"
+#include "managers/ProgramManager.h"
 #include "glm/ext/matrix_float4x4.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/vector_float3.hpp"
 #include "glm/matrix.hpp"
 #include "glm/trigonometric.hpp"
-#include "shaders/ShadersPath.h"
+#include "shaders/src/ShadersPath.h"
 #include <iostream>
-#include <memory>
 #include "core/camera.h"
-
+#include "ECS/ecs.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stbi/stb_image.h"
 
@@ -131,9 +131,9 @@ bool application::Initialize()
         _program = programs::GetProgram(prog);
 
         _program->AddShader(programs::program::VERTEX,
-                            shaders::GetShadersPath() + "src/vertex.glsl");
+                            shaders::GetShadersPath() + "vertex.glsl");
         _program->AddShader(programs::program::FRAGMENT,
-                            shaders::GetShadersPath() + "src/fragment.glsl");
+                            shaders::GetShadersPath() + "fragment.glsl");
         _program->Link();
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 *  sizeof(float), (void*)0);
@@ -185,6 +185,12 @@ bool application::Initialize()
 	light2.set_diffuse(glm::vec3(0.5f, 0.5f, 0.5f));
 	light2.set_specular(glm::vec3(2.f, 2.f, 2.f));
 	light2.add_to_program(prog);
+
+	light2.set_active(false);
+//	glEnable(GL_CULL_FACE);
+//	glCullFace(GL_BACK);
+	//
+	entt = ecs::create_entity();
 	return true;
 }
 
@@ -193,6 +199,13 @@ void application::Run()
 {
 	if ( glfwWindowShouldClose(_window))
 		_finished = true;
+	cubePositions[0].x = sin(glfwGetTime() / 4) * 5;
+	cubePositions[0].z = cos(glfwGetTime() / 4) * 5;
+	cubePositions[0].y = sin(glfwGetTime() / 4)* cos(glfwGetTime() / 4) * 5;
+
+	light1.set_position(cubePositions[0]);
+	ecs::entity* _entity = ecs::get_entity(entt);
+	_entity->get_transform()->set_position(cubePositions[0]);
 
 	int width, height;
 	glfwGetFramebufferSize(_window, &width, &height);
@@ -211,37 +224,36 @@ void application::Run()
 	view = glm::inverse(camera::GetViewMatrix());
 
 	
-	_program->SetUniformMatrix4fv("view", false, glm::value_ptr(view));
-	_program->SetUniformMatrix4fv("projection", false, glm::value_ptr(projection));
+	_program->SetUniformMatrix4fv("projection_view", false, glm::value_ptr(projection * view));
 	
 	glBindTexture(GL_TEXTURE_2D, _texture);
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, _texture_specular);
-
+	_program->SetUniform1i("material.ambient", 0);
+	_program->SetUniform1i("material.specular", 1);
+	_program->SetUniform1f("material.diffuse", 0.5f);
+	_program->SetUniform1i("material.shininess", 1024);
 	camera::Update();
+	_program->SetUniform3fv("eyePos", glm::value_ptr(camera::GetCameraPos()));
 	for ( unsigned int i = 0; i < 10; ++i )
 	{
-		_program->SetUniform3fv("eyePos", glm::value_ptr(camera::GetCameraPos()));
+		glm::mat4 model = glm::mat4(1.f);
 		_program->SetUniform1i("isLight", 0);
-		if ( i == 1 or i == 0 )
+		if ( i == 0 )
 		{
 			//cubePositions[i].x = sin(glfwGetTime() / 4) * 5;
 			//cubePositions[i].z = cos(glfwGetTime() / 4) * 5;
 			//cubePositions[i].y = sin(glfwGetTime() / 4)* cos(glfwGetTime() / 4) * 5;
+			model = _entity->get_transform()->get_model();
 			_program->SetUniform1i("isLight", 1);
 		}
-		else {
-			_program->SetUniform1i("material.ambient", 0);
-			_program->SetUniform1i("material.specular", 1);
-			_program->SetUniform1f("material.diffuse", 0.5f);
-			_program->SetUniform1i("material.shininess", 1024);
+		else 
+		{
+			model = glm::translate(model, cubePositions[i]);
+			model = glm::rotate(model, glm::radians((float)glfwGetTime() * i), glm::vec3(1.f,1.f, 1.f));
+			model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));
 		}
-
-		glm::mat4 model = glm::mat4(1.f);
-		model = glm::translate(model, cubePositions[i]);
-		model = glm::rotate(model, glm::radians((float)glfwGetTime() * i), glm::vec3(1.f,1.f, 1.f));
-		model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));
 		_program->SetUniformMatrix4fv("model", false, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}

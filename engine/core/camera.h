@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/common.h"
+#include "core/GLCommon.h"
 #include "glm/ext/matrix_float4x4.hpp"
 
 namespace camera

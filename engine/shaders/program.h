@@ -1,4 +1,5 @@
 #pragma once
+#include "core/GLCommon.h"
 #include "core/common.h"
 #include "shader.h"
 #include <unordered_map>
