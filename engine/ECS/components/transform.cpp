@@ -17,10 +17,6 @@ transform_id create_transform(entity::entity* entity)
 		generations.emplace_back(0);
 
 	transform_id id = id::set_generation(index, generations[index]); 	
-	
-	#ifdef _DEBUG
-	std::cout << "created transform with generation: " << id::generation(id) << ", and index: " << id::index(id) << std::endl;
-	#endif
 
 	return id;
 }
@@ -29,9 +25,6 @@ void delete_transform(transform_id id)
 {
 	assert( id::generation(id) < generations.size());
 	assert(id::generation(id) == generations[id::index(id)]);
-	#ifdef _DEBUG
-	std::cout << "deleted transform with generation: " << id::generation(id) << ", and index: " << id::index(id) << std::endl;
-	#endif
 	transforms.erase(transforms.begin() + id::index(id));
 	++generations[id::index(id)];
 }

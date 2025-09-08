@@ -28,10 +28,6 @@ entity::entity_id create_entity()
 	
 	entity::entity_id id = id::set_generation(index, generations[index]);
 
-	#ifdef _DEBUG
-	std::cout << "created entity with generation: " << id::generation(id) << ", and index: " << id::index(id) << std::endl;
-	#endif
-
 	return id;
 }
 

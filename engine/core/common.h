@@ -6,6 +6,7 @@
 #include "primitive_types.h"
 #include "id.h"
 
+#include "spdlog/spdlog.h"
 
 namespace ecs::entity{
 	DEFINE_TYPED_ID(entity);

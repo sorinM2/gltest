@@ -20,6 +20,7 @@ add_executable(engine ../glad/src/glad.c
 
 target_include_directories(engine PUBLIC ../glfw/include/)
 target_include_directories(engine PUBLIC ../glad/include/)
+target_include_directories(engine PUBLIC ../spdlog/include/ )
 target_include_directories(engine PUBLIC ../engine/ )
 target_include_directories(engine PUBLIC ../ )
 

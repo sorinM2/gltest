@@ -86,6 +86,9 @@ glm::vec3(-1.3f, 1.0f, -1.5f)
 
 bool application::Initialize()
 {
+
+	spdlog::set_pattern("[%H:%M:%S %z] [%n] [%^---%L---%$] [thread %t] %v");
+
 	if ( ! glfwInit() )
 	{
 		std::cout << "GLFW initialization failed!" << std::endl;

@@ -21,9 +21,6 @@ point_light_id create_point_light(entity::entity* entity)
    	if ( point_lights.size() > generations.size() )
 		generations.emplace_back(0);
 	point_light_id id = id::set_generation(index, generations[index]); 
-	#ifdef _DEBUG
-	std::cout << "created point_light with generation: " << id::generation(id) << ", and index: " << id::index(id) << std::endl;
-	#endif
 
 	return id;
 }
@@ -31,9 +28,6 @@ point_light_id create_point_light(entity::entity* entity)
 void delete_point_light(point_light_id id)
 {
 	assert(id::generation(id) == generations[id::index(id)]);
-	#ifdef _DEBUG
-	std::cout << "deleted point_light with generation: " << id::generation(id) << ", and index: " << id::index(id) << std::endl;
-	#endif
 	
 	point_lights.erase(point_lights.begin() + id::index(id));
 }

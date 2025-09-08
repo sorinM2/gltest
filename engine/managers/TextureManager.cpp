@@ -35,7 +35,7 @@ void add_texture(std::string path, GLenum internal_format, GLenum format)
 
 	if ( textures.find(path) != textures.end() )
 	{
-		std::cout << "Warning! Texture with path: " << path << " already exists!";
+		spdlog::warn( "Warning! Texture with path: {0} already exists!", path);
 		return;
 	}
 	
@@ -52,7 +52,7 @@ unsigned int bind_texture(std::string path)
 	auto iter = textures.find(path);
 	if ( iter == textures.end() )
 	{
-		std::cout << "Error: texture with path " << path << " does not exist." << std::endl;
+		spdlog::error( "Error! Texture with path: {0} doesn't exists!", path);
 		return ~(0);
 	}
 
@@ -65,7 +65,7 @@ unsigned int bind_texture(std::string path)
 
 	if ( slot >= gl_texture_slots.size() )
 	{
-		std::cout << "Error! Too many textures binded at once!" << std::endl;
+		spdlog::error( " Error! Too many texture binded at once!");
 		return ~(0);
 	}
 	texture->bind(slot);	
@@ -104,15 +104,13 @@ void texture_2d::initialize(std::string path, GLenum internal_format, GLenum for
 	normalize_path(path);	
 
 	_path = path;
-	#ifdef _DEBUG
-	std::cout << "creating texture with path: " << path << std::endl;
-	#endif
+
 
 	unsigned char* data = stbi_load((path).c_str(), &width, &height, &channels, 0);
 	
 	assert(data != nullptr);
 	if ( data == nullptr ){
-		std::cout << "Error! Failed to create texture with path: " << path << std::endl;
+		spdlog::error( "Error! Failed to create texture with path: {0}", path);
 		glDeleteTextures(1, &_id);
 		return;
 	}
