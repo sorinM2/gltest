@@ -17,8 +17,8 @@ public:
 	bool IsFinished() const { return _finished; }
 
 private:
-	unsigned int _texture;
-	unsigned int _texture_specular;
+	std::string _texture;
+	std::string _texture_specular;
 	programs::program* _program;
 	unsigned int _VAO;
 	unsigned int _EBO;

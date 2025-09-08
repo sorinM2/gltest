@@ -32,7 +32,7 @@ public:
 		*this = other;
 	}
 
-	constexpr vector& operator=(const vector& other) 
+	constexpr vector& operator=(vector& other) 
 	{
 		if ( this == &other )
 			return *this;
@@ -261,8 +261,10 @@ public:
 		{
 			bool* new_graveyard = reinterpret_cast<bool*>(::operator new(new_capacity * sizeof(bool)));
 			memset(new_graveyard, 0, new_capacity * sizeof(bool));
-			memcpy(new_graveyard, _is_tombstone, _size * sizeof(bool));
-			::operator delete(_is_tombstone);
+			if ( _is_tombstone ){
+				memcpy(new_graveyard, _is_tombstone, _size * sizeof(bool));
+				::operator delete(_is_tombstone);
+			}
 			_is_tombstone = new_graveyard;
 		}
 
@@ -322,7 +324,8 @@ public:
 		::operator delete(_is_tombstone);
 		_data = nullptr;
 		_size = _capacity = 0;
-
+		if constexpr ( !disable_tombstoning )
+			_first_tombstone = -1, _tombstones = 0, _is_tombstone = nullptr;
 		reserve(1);
 	}
 

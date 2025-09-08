@@ -2,21 +2,15 @@
 #include "assets/AssetsPath.h"
 #include "core/common.h"
 #include "core/GLCommon.h"
+
 #include "managers/ProgramManager.h"
-#include "glm/ext/matrix_float4x4.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/ext/vector_float3.hpp"
-#include "glm/matrix.hpp"
-#include "glm/trigonometric.hpp"
 #include "shaders/src/ShadersPath.h"
-#include <iostream>
+
 #include "core/camera.h"
 #include "ECS/ecs.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stbi/stb_image.h"
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
+#include "managers/TextureManager.h"
+
 #include "glm/gtc/type_ptr.hpp"
 
 void error_callback(int error, const char* description)
@@ -145,28 +139,11 @@ bool application::Initialize()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 6));
 	glEnableVertexAttribArray(2);
 	
-	
-	stbi_set_flip_vertically_on_load(true);
-	int width, height, channels;
-	unsigned char* data = stbi_load((assets::GetAssetsPath() + "resources/textures/container2.png").c_str(), &width, &height, &channels, 0);
+	_texture =assets::GetAssetsPath() + "resources/textures/container2.png";
+	_texture_specular = assets::GetAssetsPath() + "resources/textures/container2_specular.png";
 
-	glGenTextures(1, &_texture);
-	glBindTexture(GL_TEXTURE_2D, _texture);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	stbi_image_free(data);
-	
-	data = stbi_load((assets::GetAssetsPath() + "resources/textures/container2_specular.png").c_str(), &width, &height, &channels, 0);
-
-	glGenTextures(1, &_texture_specular);
-	glBindTexture(GL_TEXTURE_2D, _texture_specular);
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	stbi_image_free(data);
+	textures::add_texture(_texture, GL_RGBA, GL_RGBA);
+	textures::add_texture(_texture_specular, GL_RGBA, GL_RGBA);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -188,11 +165,15 @@ bool application::Initialize()
 	ecs::components::point_light::point_light* point = _entity->get_point_light();
 
 	point->set_ambient( glm::vec3(0.1f, 0.1f, 0.1f));
-	point->set_diffuse(glm::vec3(0.5f, 0.5f, 0.5f));
+	point->set_diffuse(glm::vec3(1.f, 1.f, 1.f));
 	point->set_specular(glm::vec3(10.f, 10.f, 10.f));
 	point->add_to_program(prog);
 
+	unsigned int tex_specular_slot = textures::bind_texture(_texture_specular);
+	unsigned int tex_slot = textures::bind_texture(_texture);
 
+	_program->SetUniform1i("material.ambient", tex_slot);
+	_program->SetUniform1i("material.specular", tex_specular_slot);
 	return true;
 }
 
@@ -227,12 +208,9 @@ void application::Run()
 	
 	_program->SetUniformMatrix4fv("projection_view", false, glm::value_ptr(projection * view));
 	
-	glBindTexture(GL_TEXTURE_2D, _texture);
+	
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, _texture_specular);
-	_program->SetUniform1i("material.ambient", 0);
-	_program->SetUniform1i("material.specular", 1);
+
 	_program->SetUniform1f("material.diffuse", 0.5f);
 	_program->SetUniform1i("material.shininess", 1024);
 	camera::Update();

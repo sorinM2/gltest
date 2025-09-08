@@ -8,6 +8,7 @@ add_executable(engine ../glad/src/glad.c
 		shaders/shader.cpp
 		shaders/program.cpp
 		managers/ProgramManager.cpp
+		managers/TextureManager.cpp
 		assets/AssetsPath.cpp
 		core/camera.cpp
 		ECS/components/lights/point_light.cpp

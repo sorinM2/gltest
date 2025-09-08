@@ -35,7 +35,6 @@ void delete_point_light(point_light_id id)
 	std::cout << "deleted point_light with generation: " << id::generation(id) << ", and index: " << id::index(id) << std::endl;
 	#endif
 	
-	std::cout << "debug" << ++generations[id::index(id)] << std::endl;
 	point_lights.erase(point_lights.begin() + id::index(id));
 }
 

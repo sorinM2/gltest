@@ -17,7 +17,7 @@ int main() {
 		return 0;
 	}
 
-	const double FPS = 120000.0;
+	const double FPS = 120.0;
 	double frame_duration = 1. / FPS;
 
 	double counter_start = glfwGetTime();

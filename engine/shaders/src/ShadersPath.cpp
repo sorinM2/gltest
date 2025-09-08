@@ -5,6 +5,6 @@ namespace shaders
 {
 	std::string GetShadersPath()
 	{
-		return std::string(std::filesystem::path(__FILE__).remove_filename().c_str());
+		return std::string(std::filesystem::path(__FILE__).remove_filename().string());
 	}
 }
