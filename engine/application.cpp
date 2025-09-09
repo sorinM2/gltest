@@ -12,6 +12,7 @@
 #include "managers/TextureManager.h"
 
 #include "glm/gtc/type_ptr.hpp"
+#include "content/scene.h"
 
 void error_callback(int error, const char* description)
 {	
@@ -112,16 +113,6 @@ bool application::Initialize()
 	glfwSwapInterval(0);
 	int version = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
-	glGenBuffers(1, &_VBO);
-	glGenVertexArrays(1, &_VAO);
-	glBindVertexArray(_VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glGenBuffers(1, &_EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
 	std::cout << "Shader path: " << shaders::GetShadersPath() << std::endl;
 	
 	unsigned int prog = programs::AddProgram();
@@ -133,20 +124,11 @@ bool application::Initialize()
                             shaders::GetShadersPath() + "fragment.glsl");
         _program->Link();
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 *  sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 *  sizeof(float), (void*)(sizeof(float) * 3));
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 6));
-	glEnableVertexAttribArray(2);
+	_scene = assets::GetAssetsPath() + "resources/objects/rock/rock.obj";
+	_scene2 = assets::GetAssetsPath() + "resources/objects/planet/planet.obj";
 	
-	_texture =assets::GetAssetsPath() + "resources/textures/container2.png";
-	_texture_specular = assets::GetAssetsPath() + "resources/textures/container2_specular.png";
-
-	textures::add_texture(_texture, GL_RGBA, GL_RGBA);
-	textures::add_texture(_texture_specular, GL_RGBA, GL_RGBA);
+	content::scene::create_scene(_scene);	
+	content::scene::create_scene(_scene2, false);	
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -167,16 +149,18 @@ bool application::Initialize()
 
 	ecs::components::point_light::point_light* point = _entity->get_point_light();
 
+	point->set_position(glm::vec3(0.f, 1.f, 0.f));
+
 	point->set_ambient( glm::vec3(0.1f, 0.1f, 0.1f));
 	point->set_diffuse(glm::vec3(1.f, 1.f, 1.f));
 	point->set_specular(glm::vec3(10.f, 10.f, 10.f));
+	
 	point->add_to_program(prog);
 
-	unsigned int tex_specular_slot = textures::bind_texture(_texture_specular);
-	unsigned int tex_slot = textures::bind_texture(_texture);
-
-	_program->SetUniform1i("material.ambient", tex_slot);
-	_program->SetUniform1i("material.specular", tex_specular_slot);
+	_program->SetUniform3fv("dirLight.direction", glm::value_ptr(glm::vec3(0.f, -1.f, 0.f)));
+	_program->SetUniform3fv("dirLight.ambient", glm::value_ptr(glm::vec3(0.f, 0.f, 0.f)));
+	_program->SetUniform3fv("dirLight.diffuse", glm::value_ptr(glm::vec3(0.2f, 0.2f, 0.2f)));
+	_program->SetUniform3fv("dirLight.specular", glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
 	return true;
 }
 
@@ -190,20 +174,17 @@ void application::Run()
 	cubePositions[0].y = sin(glfwGetTime() / 4)* cos(glfwGetTime() / 4) * 5;
 
 	ecs::entity::entity* _entity = ecs::get_entity(entt);
-	_entity->get_transform()->set_position(cubePositions[0]);
 	ecs::update();
 	int width, height;
 	glfwGetFramebufferSize(_window, &width, &height);
 	glViewport(0, 0, width, height);
 	glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 	
-	glBindVertexArray(_VAO);
-
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	_program->Bind();
 
 	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(45.0f), (float )width / (float) height, 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(45.0f), (float )width / (float) height, 0.1f, 1000.0f);
 
 	glm::mat4 view = glm::mat4(1.f);
 	view = glm::inverse(camera::GetViewMatrix());
@@ -211,14 +192,27 @@ void application::Run()
 	
 	_program->SetUniformMatrix4fv("projection_view", false, glm::value_ptr(projection * view));
 	
-	
+	content::scene::scene* sc = content::scene::get_scene(_scene);
+	content::scene::scene* sc2 = content::scene::get_scene(_scene2);
 
 
-	_program->SetUniform1f("material.diffuse", 0.5f);
+	_program->SetUniform1f("material.diffuse", 1.f);
 	_program->SetUniform1i("material.shininess", 1024);
 	camera::Update();
 	_program->SetUniform3fv("eyePos", glm::value_ptr(camera::GetCameraPos()));
-	for ( unsigned int i = 0; i < 10; ++i )
+	
+	for ( unsigned int i = 0; i < 50; ++i )
+		for ( unsigned int j = 0; j < 50; ++j )
+		{
+			glm::mat4 model = glm::mat4(1.f);
+			model = glm::translate(model, glm::vec3(i * 10.f, 0.f, j * 10.f));
+			model = glm::scale(model, glm::vec3(1.f, 1.f, 1.f));
+			sc2 -> draw(_program, model);
+		}
+
+
+
+/*	for ( unsigned int i = 0; i < 10; ++i )
 	{
 		glm::mat4 model = glm::mat4(1.f);
 		_program->SetUniform1i("isLight", 0);
@@ -239,7 +233,7 @@ void application::Run()
 		_program->SetUniformMatrix4fv("model", false, glm::value_ptr(model));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
-
+*/
 	glfwSwapBuffers(_window);
 	glfwPollEvents();
 

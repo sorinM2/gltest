@@ -4,7 +4,7 @@
 #include "core/common.h"
 #include <memory>
 #include "ECS/entity.h"
-
+#include "content/scene.h"
 struct GLFWwindow;
 
 class application
@@ -26,6 +26,8 @@ private:
 	GLFWwindow* _window;
 	bool _finished = false;
 	
+	std::string _scene;
+	std::string _scene2;
 	ecs::entity::entity_id entt;
 
 };

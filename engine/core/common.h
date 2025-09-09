@@ -19,3 +19,8 @@ namespace ecs::components::transform{
 namespace ecs::components::point_light {
 	DEFINE_TYPED_ID(point_light);
 }
+
+namespace ecs::components::geometry 
+{
+	DEFINE_TYPED_ID(geometry);
+}

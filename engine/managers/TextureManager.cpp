@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include "assets/AssetsPath.h"
 #include <filesystem>
-
+#include "utility/path.h"
 namespace textures 
 {
 
@@ -20,24 +20,14 @@ std::array<GLenum, 32> gl_texture_slots =
 	GL_TEXTURE30, GL_TEXTURE31
 };
 
-void normalize_path(std::string& path)
-{
-	auto p = std::filesystem::canonical(path);
-	path = p.string();
-}
+
 
 std::unordered_map<std::string, texture_2d> textures;
 utl::vector<int, false> free_slots;
 
 void add_texture(std::string path, GLenum internal_format, GLenum format)
 {
-	normalize_path(path);
-
-	if ( textures.find(path) != textures.end() )
-	{
-		spdlog::warn( "Warning! Texture with path: {0} already exists!", path);
-		return;
-	}
+	utl::normalize_path(path);
 	
 	texture_2d new_tex;
 
@@ -47,7 +37,7 @@ void add_texture(std::string path, GLenum internal_format, GLenum format)
 
 unsigned int bind_texture(std::string path)
 {
-	normalize_path(path);
+	utl::normalize_path(path);
 	
 	auto iter = textures.find(path);
 	if ( iter == textures.end() )
@@ -101,7 +91,7 @@ void texture_2d::initialize(std::string path, GLenum internal_format, GLenum for
 	stbi_set_flip_vertically_on_load(true);
 	int width, height, channels;
 
-	normalize_path(path);	
+	utl::normalize_path(path);	
 
 	_path = path;
 
@@ -116,10 +106,14 @@ void texture_2d::initialize(std::string path, GLenum internal_format, GLenum for
 	}
 
 	glBindTexture(GL_TEXTURE_2D, _id);
+	if ( channels == 4 )
+		format = internal_format = GL_RGBA;
+	else if ( channels == 3) 
+		format = internal_format = GL_RGB;
+	else format = internal_format = GL_ALPHA;
 
 	glTexImage2D(GL_TEXTURE_2D, 0, internal_format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
-
 	stbi_image_free(data);
 }
 

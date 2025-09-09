@@ -125,5 +125,6 @@ void main()
 	for ( int i = 0; i < NUM_POINT_LIGHTS; ++i )
 		if ( pointLights[i].is_active )
 			_output += GetPointLight(pointLights[i]);
+	_output += GetDirectionalLight(dirLight);
 	FragColor = vec4(_output, 1.f);
 }

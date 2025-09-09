@@ -6,6 +6,7 @@
 #include <cstring>
 #include <memory>
 #include "iterator.h"
+	#include <iostream>
 namespace utl
 {
 
@@ -52,7 +53,28 @@ public:
 		
 		return *this;
 	}
-
+	constexpr vector& operator=(const vector& other) 
+	{
+		if ( this == &other )
+			return *this;
+		
+		clear();
+		reserve(other.size());
+		
+		for ( unsigned int i = 0; i < other.size(); ++i )
+		{
+			T& c = *(other.data() + i);
+			if constexpr (disable_tombstoning)
+				emplace_back(c);
+			else if ( !other.is_tombstone(&c) )
+				emplace_back(c);
+			else {
+				memset(end(), 'd', sizeof(T));
+				_size++;
+			}
+		}
+		return *this;
+	}
 	vector(vector&& other ) noexcept
 	{
 		*this = std::move(other);
@@ -330,10 +352,11 @@ public:
 	}
 
 
-
 	constexpr T& operator[]( unsigned int pos)
 	{
-		assert(pos >= 0 && pos < _size );
+		if ( pos >= _size)
+			std::cout << "error " << pos << " " << _size << std::endl;
+			assert(pos >= 0 && pos < _size );
 		if constexpr ( !disable_tombstoning )
 			assert(!is_tombstone(_data + pos));
 		return *(_data + pos);
@@ -341,6 +364,9 @@ public:
 
 	constexpr const T& operator[](unsigned int pos) const
 	{
+		if ( pos >= _size)
+			std::cout << "error " << pos << " " << _size << std::endl;
+
 		assert(pos >= 0 && pos < _size );
 		if constexpr ( !disable_tombstoning )
 			assert(!is_tombstone(_data + pos));
