@@ -9,6 +9,7 @@
 #include "core/camera.h"
 #include "ECS/ecs.h"
 
+
 #include "managers/TextureManager.h"
 
 #include "glm/gtc/type_ptr.hpp"
@@ -125,10 +126,8 @@ bool application::Initialize()
         _program->Link();
 
 	_scene = assets::GetAssetsPath() + "resources/objects/rock/rock.obj";
-	_scene2 = assets::GetAssetsPath() + "resources/objects/planet/planet.obj";
+	_scene2 = assets::GetAssetsPath() + "resources/objects/cro.glb";
 	
-	content::scene::create_scene(_scene);	
-	content::scene::create_scene(_scene2, false);	
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -139,28 +138,27 @@ bool application::Initialize()
 	ecs::entity::entity* _entity = ecs::get_entity(entt);
 
 	_entity->create_point_light();
-	
-	ecs::remove_entity(entt);
-
-	entt = ecs::create_entity();
-	_entity = ecs::get_entity(entt);
-
-	_entity->create_point_light();
+	_entity->create_geometry(_scene2, _program);
 
 	ecs::components::point_light::point_light* point = _entity->get_point_light();
 
 	point->set_position(glm::vec3(0.f, 1.f, 0.f));
 
 	point->set_ambient( glm::vec3(0.1f, 0.1f, 0.1f));
-	point->set_diffuse(glm::vec3(1.f, 1.f, 1.f));
-	point->set_specular(glm::vec3(10.f, 10.f, 10.f));
+	point->set_diffuse(glm::vec3(0.3f, 0.3f, 0.3f));
+	point->set_specular(glm::vec3(1.f, 1.f, 1.f));
 	
 	point->add_to_program(prog);
 
-	_program->SetUniform3fv("dirLight.direction", glm::value_ptr(glm::vec3(0.f, -1.f, 0.f)));
-	_program->SetUniform3fv("dirLight.ambient", glm::value_ptr(glm::vec3(0.f, 0.f, 0.f)));
-	_program->SetUniform3fv("dirLight.diffuse", glm::value_ptr(glm::vec3(0.2f, 0.2f, 0.2f)));
+	_program->SetUniform3fv("dirLight.direction", glm::value_ptr(glm::vec3(-0.5f, -1.f, 0.3f)));
+	_program->SetUniform3fv("dirLight.ambient", glm::value_ptr(glm::vec3(0.23f, 0.23f, 0.23f)));
+	_program->SetUniform3fv("dirLight.diffuse", glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
 	_program->SetUniform3fv("dirLight.specular", glm::value_ptr(glm::vec3(1.f, 1.f, 1.f)));
+
+	_entity->get_transform()->set_position(glm::vec3(0.f, 0.f, 0.f));
+	_entity->get_transform()->set_rotation(glm::vec3(180.f, 0.f, 0.f));
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 	return true;
 }
 
@@ -174,7 +172,6 @@ void application::Run()
 	cubePositions[0].y = sin(glfwGetTime() / 4)* cos(glfwGetTime() / 4) * 5;
 
 	ecs::entity::entity* _entity = ecs::get_entity(entt);
-	ecs::update();
 	int width, height;
 	glfwGetFramebufferSize(_window, &width, &height);
 	glViewport(0, 0, width, height);
@@ -201,39 +198,8 @@ void application::Run()
 	camera::Update();
 	_program->SetUniform3fv("eyePos", glm::value_ptr(camera::GetCameraPos()));
 	
-	for ( unsigned int i = 0; i < 50; ++i )
-		for ( unsigned int j = 0; j < 50; ++j )
-		{
-			glm::mat4 model = glm::mat4(1.f);
-			model = glm::translate(model, glm::vec3(i * 10.f, 0.f, j * 10.f));
-			model = glm::scale(model, glm::vec3(1.f, 1.f, 1.f));
-			sc2 -> draw(_program, model);
-		}
+	ecs::update();
 
-
-
-/*	for ( unsigned int i = 0; i < 10; ++i )
-	{
-		glm::mat4 model = glm::mat4(1.f);
-		_program->SetUniform1i("isLight", 0);
-		if ( i == 0 )
-		{
-			//cubePositions[i].x = sin(glfwGetTime() / 4) * 5;
-			//cubePositions[i].z = cos(glfwGetTime() / 4) * 5;
-			//cubePositions[i].y = sin(glfwGetTime() / 4)* cos(glfwGetTime() / 4) * 5;
-			model = _entity->get_transform()->get_model();
-			_program->SetUniform1i("isLight", 1);
-		}
-		else 
-		{
-			model = glm::translate(model, cubePositions[i]);
-			model = glm::rotate(model, glm::radians((float)glfwGetTime() * i), glm::vec3(1.f,1.f, 1.f));
-			model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));
-		}
-		_program->SetUniformMatrix4fv("model", false, glm::value_ptr(model));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-	}
-*/
 	glfwSwapBuffers(_window);
 	glfwPollEvents();
 

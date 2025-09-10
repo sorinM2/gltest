@@ -1,6 +1,5 @@
 project(engine)
 
-
 add_executable(engine ../glad/src/glad.c
 		main.cpp
 		shaders/src/ShadersPath.cpp
@@ -13,6 +12,7 @@ add_executable(engine ../glad/src/glad.c
 		core/camera.cpp
 		ECS/components/lights/point_light.cpp
 		ECS/components/transform.cpp
+		ECS/components/geometry.cpp
 		ECS/ecs.cpp
 		ECS/entity.cpp
 		utility/path.cpp

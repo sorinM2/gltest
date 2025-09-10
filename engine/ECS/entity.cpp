@@ -1,5 +1,5 @@
 #include "entity.h"
-
+#include "shaders/program.h"
 namespace ecs::entity 
 {
 
@@ -34,4 +34,15 @@ components::point_light::point_light* entity::get_point_light()
 {
 	return components::point_light::get_point_light(_point_light);
 }
+
+void entity::create_geometry(const std::string& model_path, programs::program* program, bool textrue_flipped)
+{
+	_geometry = components::geometry::create_geometry(this, model_path, program, textrue_flipped);
+}
+
+components::geometry::geometry* entity::get_geometry()
+{
+	return components::geometry::get_geometry(_geometry);
+}
+
 }

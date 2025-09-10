@@ -24,8 +24,13 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 void MouseCursorCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	rotation.x = -xpos / 10;
-	rotation.y = -ypos / 10;
+	static float first_x = xpos, first_y = ypos;
+
+	xpos = first_x - xpos;
+	ypos = first_y - ypos;
+
+	rotation.x = xpos / 10 + 180.f;
+	rotation.y = ypos / 10;
 }
 
 double last_time; 
@@ -37,8 +42,8 @@ void Initialize(GLFWwindow* win)
 	glfwSetCursorPosCallback(window, MouseCursorCallback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	position = glm::vec3(0.f, 0.f, 0.f);
-	rotation = glm::vec2(0.f, 0.f);
+	position = glm::vec3(0.f, 0.f, -20.f);
+	rotation = glm::vec2(180.f, 0.f);
 
 	view_matrix = glm::mat4(1.f);
 }

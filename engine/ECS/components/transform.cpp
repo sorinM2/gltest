@@ -37,6 +37,7 @@ bool is_valid(transform_id id)
 
 transform* get_transform(transform_id id )
 {
+	assert(id::index(id) < transforms.size());
 	assert(id::generation(id) == generations[id::index(id)]);
 
 	return &transforms[id::index(id)];

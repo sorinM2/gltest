@@ -9,7 +9,7 @@ in vec2 texCoord;
 in vec3 normal;
 in vec3 position;
 
-vec3 light_color = vec3(1.f, 1.f, 1.f);
+vec3 light_color = vec3(0.5f, 0.5f, 0.5f);
 float specular_strength = 0.5;
 
 struct Material

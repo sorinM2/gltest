@@ -22,6 +22,8 @@ void scene::draw(programs::program* prog, glm::mat4 global_model)
 void create_scene(std::string path, bool uv_flipped)
 {
 	utl::normalize_path(path);
+	if ( scenes.find(path) != scenes.end() )
+		return;
 	scenes[path] = create_scene_from_file(path, uv_flipped);		
 }
 

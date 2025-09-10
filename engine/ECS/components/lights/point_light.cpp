@@ -34,6 +34,7 @@ void delete_point_light(point_light_id id)
 
 point_light* get_point_light(point_light_id id )
 {
+	assert(id::index(id) < point_lights.size());
 	assert(id::generation(id) == generations[id::index(id)]);
 
 	return &point_lights[id::index(id)];
@@ -129,9 +130,11 @@ void point_light::remove_from_program(unsigned int id)
 	_programs.erase(id);
 }
 	
-
 void point_light::set_position(const glm::vec3& position)
 {
+	if ( _position == position )
+		return;
+	
 	_position = position; 
 	std::string position_name = get_uniform_name("position");
 
