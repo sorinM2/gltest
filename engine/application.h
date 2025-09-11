@@ -19,10 +19,13 @@ public:
 private:
 	std::string _texture;
 	std::string _texture_specular;
+	std::string _texture_fbo = "*fbo_texture";
+
+
 	programs::program* _program;
-	unsigned int _VAO;
-	unsigned int _EBO;
-	unsigned int _VBO;
+
+	unsigned int _FBO;
+	unsigned int _RBO;
 	GLFWwindow* _window;
 	bool _finished = false;
 	

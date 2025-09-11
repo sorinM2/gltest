@@ -1,19 +1,19 @@
 #include "application.h"
-#include "assets/AssetsPath.h"
-#include "core/common.h"
 #include "core/GLCommon.h"
 
+#include "ECS/ecs.h"
 #include "managers/ProgramManager.h"
+#include "managers/TextureManager.h"
+
 #include "shaders/src/ShadersPath.h"
+#include "assets/AssetsPath.h"
 
 #include "core/camera.h"
-#include "ECS/ecs.h"
-
-
-#include "managers/TextureManager.h"
 
 #include "glm/gtc/type_ptr.hpp"
 #include "content/scene.h"
+
+#include "editor/editor.h"
 
 void error_callback(int error, const char* description)
 {	
@@ -27,64 +27,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		glfwSetWindowShouldClose(window, true);
 	}
 }
-float vertices[] = {
-// positions // normals // texture coords
--0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
--0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
--0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
--0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
--0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
--0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
--0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
--0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
--0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
--0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
--0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
--0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
--0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
-0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
--0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
--0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
--0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
--0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
--0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
-};
 
-int indices[] = 
-{
-	0, 1, 2,
-	0, 2, 3
-};
-
-glm::vec3 cubePositions[] = {
-glm::vec3( 0.0f, 0.0f, -1.0f),
-glm::vec3( 2.0f, 5.0f, -15.0f),
-glm::vec3(-1.5f, -2.2f, -2.5f),
-glm::vec3(-3.8f, -2.0f, -12.3f),
-glm::vec3( 2.4f, -0.4f, -3.5f),
-glm::vec3(-1.7f, 3.0f, -7.5f),
-glm::vec3( 1.3f, -2.0f, -2.5f),
-glm::vec3( 1.5f, 2.0f, -2.5f),
-glm::vec3( 1.5f, 0.2f, -1.5f),
-glm::vec3(-1.3f, 1.0f, -1.5f)
-};
 
 bool application::Initialize()
 {
@@ -114,7 +57,7 @@ bool application::Initialize()
 	glfwSwapInterval(0);
 	int version = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
-	std::cout << "Shader path: " << shaders::GetShadersPath() << std::endl;
+	editor::initialize(_window);
 	
 	unsigned int prog = programs::AddProgram();
         _program = programs::GetProgram(prog);
@@ -126,7 +69,7 @@ bool application::Initialize()
         _program->Link();
 
 	_scene = assets::GetAssetsPath() + "resources/objects/rock/rock.obj";
-	_scene2 = assets::GetAssetsPath() + "resources/objects/cro.glb";
+	_scene2 = assets::GetAssetsPath() + "resources/objects/bred/bread.glb";
 	
 
 	glEnable(GL_DEPTH_TEST);
@@ -157,27 +100,54 @@ bool application::Initialize()
 
 	_entity->get_transform()->set_position(glm::vec3(0.f, 0.f, 0.f));
 	_entity->get_transform()->set_rotation(glm::vec3(180.f, 0.f, 0.f));
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
+
+	textures::add_texture(_texture_fbo);
+
+	glGenFramebuffers(1, &_FBO);
+	glGenRenderbuffers(1, &_RBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, _FBO);
+	glEnable(GL_DEPTH_TEST);
+
 	return true;
 }
 
+unsigned int width = 960, height = 540;
 
 void application::Run()
 {
 	if ( glfwWindowShouldClose(_window))
 		_finished = true;
-	cubePositions[0].x = sin(glfwGetTime() / 4) * 5;
-	cubePositions[0].z = cos(glfwGetTime() / 4) * 5;
-	cubePositions[0].y = sin(glfwGetTime() / 4)* cos(glfwGetTime() / 4) * 5;
+	
+	editor::start_frame();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, _FBO);
+
+
+
+	textures::bind_texture(_texture_fbo);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	textures::texture_2d* tex = textures::get_texture(_texture_fbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->get_id(), 0);
+	
+	glBindRenderbuffer(GL_RENDERBUFFER, _RBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _RBO);
+
+	glClearColor(0.1f, 0.1f, 0.1f, 1.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	ecs::entity::entity* _entity = ecs::get_entity(entt);
-	int width, height;
-	glfwGetFramebufferSize(_window, &width, &height);
+
 	glViewport(0, 0, width, height);
-	glClearColor(0.1f, 0.1f, 0.1f, 1.f);
-	
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
 	_program->Bind();
 
 	glm::mat4 projection;
@@ -199,6 +169,24 @@ void application::Run()
 	_program->SetUniform3fv("eyePos", glm::value_ptr(camera::GetCameraPos()));
 	
 	ecs::update();
+	
+	ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_FirstUseEver);
+	ImGui::Begin("window");
+	
+	ImVec2 size = ImGui::GetWindowSize();
+	ImVec2 pos = ImGui::GetWindowPos();
+
+	width = size.x; height = size.y;
+
+	ImGui::Image((ImTextureID)tex->get_id(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+
+	ImGui::End();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClearColor(0.f, 0.f, 0.f, 1.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	editor::draw();
 
 	glfwSwapBuffers(_window);
 	glfwPollEvents();

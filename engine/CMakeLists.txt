@@ -1,7 +1,6 @@
 project(engine)
 
-add_executable(engine ../glad/src/glad.c
-		main.cpp
+add_executable(engine main.cpp ../glad/src/glad.c
 		shaders/src/ShadersPath.cpp
 		application.cpp
 		shaders/shader.cpp
@@ -21,6 +20,8 @@ add_executable(engine ../glad/src/glad.c
 		content/model.cpp 
 		content/scene.cpp 
 
+		editor/editor.cpp
+
 )
 
 
@@ -29,10 +30,12 @@ target_include_directories(engine PUBLIC ../glad/include/)
 target_include_directories(engine PUBLIC ../assimp/include/ )
 target_include_directories(engine PUBLIC ../spdlog/include/ )
 target_include_directories(engine PUBLIC ../engine/ )
+target_include_directories(engine PUBLIC ../imgui/ )
 target_include_directories(engine PUBLIC ../ )
 
 target_link_libraries(engine glfw)
 target_link_libraries(engine assimp)
+target_link_libraries(engine imgui)
 
 find_package(OpenGL REQUIRED)
 

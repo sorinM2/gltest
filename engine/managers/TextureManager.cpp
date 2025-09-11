@@ -25,19 +25,29 @@ std::array<GLenum, 32> gl_texture_slots =
 std::unordered_map<std::string, texture_2d> textures;
 utl::vector<int, false> free_slots;
 
-void add_texture(std::string path, GLenum internal_format, GLenum format)
+void add_texture(std::string path)
 {
-	utl::normalize_path(path);
+	if ( path[0] != '*' )
+		utl::normalize_path(path);
 	
 	texture_2d new_tex;
 
 	textures[path] = new_tex;
-	textures[path].initialize(path, internal_format, format);
+	textures[path].initialize(path);
+}
+
+texture_2d* get_texture(std::string path)
+{
+	if ( path[0] != '*' )
+		utl::normalize_path(path);
+	assert(textures.find(path) != textures.end());
+	return &textures[path];
 }
 
 unsigned int bind_texture(std::string path)
 {
-	utl::normalize_path(path);
+	if ( path[0] != '*')
+		utl::normalize_path(path);
 	
 	auto iter = textures.find(path);
 	if ( iter == textures.end() )
@@ -85,9 +95,13 @@ utl::vector<unsigned int> set_texture_list(utl::vector<std::string> list)
 	return slots;
 }
 
-void texture_2d::initialize(std::string path, GLenum internal_format, GLenum format)
+void texture_2d::initialize(std::string path)
 {
 	glGenTextures(1, &_id);
+
+	if ( path[0] == '*' )
+		return;
+
 	stbi_set_flip_vertically_on_load(true);
 	int width, height, channels;
 
@@ -105,6 +119,7 @@ void texture_2d::initialize(std::string path, GLenum internal_format, GLenum for
 		return;
 	}
 
+	GLenum format, internal_format;
 	glBindTexture(GL_TEXTURE_2D, _id);
 	if ( channels == 4 )
 		format = internal_format = GL_RGBA;

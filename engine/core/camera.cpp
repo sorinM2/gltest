@@ -22,15 +22,23 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		key_map[key] = false;
 }
 
+void change_rotation(double dx, double dy)
+{
+
+}
 void MouseCursorCallback(GLFWwindow* window, double xpos, double ypos)
 {
-	static float first_x = xpos, first_y = ypos;
+	static float last_x = xpos, last_y = ypos;
+	
 
-	xpos = first_x - xpos;
-	ypos = first_y - ypos;
+	double _xpos = last_x - xpos;
+	double _ypos = last_y - ypos;
+	
+	last_x = xpos;
+	last_y = ypos;
 
-	rotation.x = xpos / 10 + 180.f;
-	rotation.y = ypos / 10;
+	rotation.x += _xpos / 10;
+	rotation.y += _ypos / 10;
 }
 
 double last_time; 
@@ -39,8 +47,8 @@ void Initialize(GLFWwindow* win)
 	last_time = glfwGetTime();
 	window = win;
 	glfwSetKeyCallback(window, KeyCallback);
-	glfwSetCursorPosCallback(window, MouseCursorCallback);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetCursorPosCallback(window, MouseCursorCallback);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	position = glm::vec3(0.f, 0.f, -20.f);
 	rotation = glm::vec2(180.f, 0.f);
@@ -70,6 +78,11 @@ void Update()
 	forward = transform * glm::vec4(forward, 1.f);
 	
 	glm::vec3 difference = glm::vec3(0.f, 0.f, 0.f);
+
+	rotation.x += key_map[GLFW_KEY_LEFT] * 0.05;
+	rotation.x -= key_map[GLFW_KEY_RIGHT] * 0.05;
+	rotation.y -= key_map[GLFW_KEY_DOWN] * 0.05;
+	rotation.y += key_map[GLFW_KEY_UP] * 0.05;
 
 	if ( key_map[GLFW_KEY_W] )
 		difference += forward;

@@ -74,7 +74,7 @@ utl::vector<std::string> create_and_reister_texture_type(aiMaterial* material, a
 
 		GLenum format;
 		_extension == ".png" ? format = GL_RGBA : format = GL_RGB;
-		textures::add_texture(path, format, format);
+		textures::add_texture(path);
 		_textures.emplace_back(path);
 	}
 	return _textures;

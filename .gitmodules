@@ -10,3 +10,6 @@
 [submodule "assimp"]
 	path = assimp
 	url = https://github.com/assimp/assimp.git
+[submodule "imgui"]
+	path = imgui
+	url = git@github.com:sorinM2/imgui.git

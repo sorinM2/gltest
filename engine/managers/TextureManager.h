@@ -8,10 +8,11 @@ namespace textures
 class texture_2d
 {
 public:
-	void initialize(std::string path, GLenum internal_format, GLenum format);
+	void initialize(std::string path);
 	void bind(unsigned int slot);
 	void unbind();
-
+	
+	unsigned int get_id() const { return _id; }
 private:
 	bool binded = false;
 	unsigned int _slot;
@@ -21,8 +22,11 @@ private:
 };
 
 
-void add_texture(std::string path, GLenum internal_format, GLenum format);
+void add_texture(std::string path);
 unsigned int bind_texture(std::string path);
 utl::vector<unsigned int> set_texture_list(utl::vector<std::string> list);
 void unbind_all();
+
+texture_2d* get_texture(std::string path);
+
 }
