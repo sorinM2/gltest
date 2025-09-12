@@ -104,12 +104,9 @@ bool application::Initialize()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	textures::add_texture(_texture_fbo);
-
-	glGenFramebuffers(1, &_FBO);
-	glGenRenderbuffers(1, &_RBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, _FBO);
-	glEnable(GL_DEPTH_TEST);
+	_framebuf = new data::FrameBuffer(960, 540, true);
+	_framebuf->add_texture_2d("culori", GL_RGB, GL_COLOR_ATTACHMENT0);
+	_framebuf->add_renderbuffer("depth", GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT);
 
 	return true;
 }
@@ -123,35 +120,16 @@ void application::Run()
 	
 	editor::start_frame();
 
-	glBindFramebuffer(GL_FRAMEBUFFER, _FBO);
-
-
-
-	textures::bind_texture(_texture_fbo);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);	
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	textures::texture_2d* tex = textures::get_texture(_texture_fbo);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->get_id(), 0);
-	
-	glBindRenderbuffer(GL_RENDERBUFFER, _RBO);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _RBO);
-
-	glClearColor(0.1f, 0.1f, 0.1f, 1.f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	_framebuf->bind();
+	_framebuf->clear();
 
 	ecs::entity::entity* _entity = ecs::get_entity(entt);
-
-	glViewport(0, 0, width, height);
-
 
 	_program->Bind();
 
 	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(45.0f), (float )width / (float) height, 0.1f, 1000.0f);
+
+	projection = glm::perspective(glm::radians(45.0f), (float )_framebuf->get_width() / (float)_framebuf->get_height(), 0.1f, 1000.0f);
 
 	glm::mat4 view = glm::mat4(1.f);
 	view = glm::inverse(camera::GetViewMatrix());
@@ -170,15 +148,17 @@ void application::Run()
 	
 	ecs::update();
 	
-	ImGui::SetNextWindowSize(ImVec2(width, height), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSize(ImVec2(_framebuf->get_width(), _framebuf->get_height()), ImGuiCond_Always);
 	ImGui::Begin("window");
 	
 	ImVec2 size = ImGui::GetWindowSize();
 	ImVec2 pos = ImGui::GetWindowPos();
 
 	width = size.x; height = size.y;
+	
+	_framebuf->set_size(width, height);
 
-	ImGui::Image((ImTextureID)tex->get_id(), ImGui::GetContentRegionAvail(), ImVec2(0, 1), ImVec2(1, 0));
+	ImGui::Image((ImTextureID)_framebuf->get_texture_2d("culori"), ImGui::GetContentRegionAvail() , ImVec2(0, 1), ImVec2(1, 0));
 
 	ImGui::End();
 

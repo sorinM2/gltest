@@ -22,6 +22,8 @@ add_executable(engine main.cpp ../glad/src/glad.c
 
 		editor/editor.cpp
 
+		data/FrameBuffer.cpp
+
 )
 
 

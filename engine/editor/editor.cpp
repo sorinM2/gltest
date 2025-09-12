@@ -38,7 +38,7 @@ void start_frame()
 
 void draw()
 {
-	ImGui::Render();    
+	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	ImGui::EndFrame();
 }

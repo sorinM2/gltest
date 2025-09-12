@@ -5,6 +5,7 @@
 #include <memory>
 #include "ECS/entity.h"
 #include "content/scene.h"
+#include "data/FrameBuffer.h"
 struct GLFWwindow;
 
 class application
@@ -23,10 +24,12 @@ private:
 
 
 	programs::program* _program;
+	data::FrameBuffer* _framebuf;
 
 	unsigned int _FBO;
 	unsigned int _RBO;
 	GLFWwindow* _window;
+
 	bool _finished = false;
 	
 	std::string _scene;
