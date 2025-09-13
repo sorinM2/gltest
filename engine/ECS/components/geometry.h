@@ -13,19 +13,19 @@ namespace ecs::components::geometry
 class geometry 
 {
 public:
-	geometry(entity::entity* entity, const std::string& model_path, programs::program* program, bool texture_flipped = false);	
+	geometry(entity::entity_id entity, const std::string& model_path, programs::program* program, bool texture_flipped = false);	
 	void draw();
 private:
 	programs::program* _program;
-	entity::entity* _entity;
+	entity::entity_id _entity_id;
 	std::string path = "";
 };
 
-geometry_id create_geometry(entity::entity* entity, const std::string& model_path, programs::program* program, bool texture_flipped = false);
+geometry_id create_geometry(entity::entity_id entity, const std::string& model_path, programs::program* program, bool texture_flipped = false);
 void remove_geometry(geometry_id id);
 
 geometry* get_geometry(geometry_id id);
-bool is_alive(geometry_id id);
+bool is_valid(geometry_id id);
 
 void draw();
 

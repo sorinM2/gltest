@@ -24,3 +24,13 @@ namespace ecs::components::geometry
 {
 	DEFINE_TYPED_ID(geometry);
 }
+
+namespace data::framebuffer 
+{
+	DEFINE_TYPED_ID(framebuffer);
+}
+
+namespace programs
+{
+	DEFINE_TYPED_ID(program);
+}

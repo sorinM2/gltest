@@ -3,6 +3,7 @@
 #include "utility/vector.h"
 #include "ECS/entity.h"
 #include "managers/ProgramManager.h"
+#include "ECS/ecs.h"
 namespace ecs::components::geometry 
 {
 
@@ -11,9 +12,9 @@ namespace {
 	utl::vector<unsigned int> generations;
 }
 
-geometry::geometry(entity::entity* entity, const std::string& model_path, programs::program* program, bool texture_flipped)
+geometry::geometry(entity::entity_id entity, const std::string& model_path, programs::program* program, bool texture_flipped)
 {
-	_entity = entity;
+	_entity_id = entity;
 	_program = program;
 	path = model_path;
 	content::scene::create_scene(path, texture_flipped);
@@ -21,6 +22,7 @@ geometry::geometry(entity::entity* entity, const std::string& model_path, progra
 
 void geometry::draw()
 {
+	entity::entity* _entity = ecs::get_entity(_entity_id);
 	content::scene::scene* _scene = content::scene::get_scene(path);	
 	assert( _entity->_transform != id::invalid_id);
 
@@ -29,11 +31,12 @@ void geometry::draw()
 		spdlog::error("Entity with geometry component must also have a transform component!");
 		return;
 	}
-
+	if ( glm::length(_entity->get_transform()->get_position() - glm::vec3(0.f, 0.f, 0.f)) > 1000)
+		return;
 	_scene->draw(_program, _entity->get_transform()->get_model());
 }
 
-geometry_id create_geometry(entity::entity* entity, const std::string& model_path, programs::program* program, bool texture_flipped)
+geometry_id create_geometry(entity::entity_id entity, const std::string& model_path, programs::program* program, bool texture_flipped)
 {
 	unsigned int index = components.emplace_tombstone(entity, model_path, program, texture_flipped);
 	if ( index >= generations.size() )

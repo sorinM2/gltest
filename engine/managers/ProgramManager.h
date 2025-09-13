@@ -1,9 +1,10 @@
 #pragma once 
-#include "utility/vector.h"
-#include "shaders/program.h"
+#include "core/common.h"
 
 namespace programs 
 {
-	unsigned int AddProgram();
-	program* GetProgram(unsigned int id);	
+	class program;
+	
+	program_id AddProgram();
+	program* GetProgram(program_id id);	
 }

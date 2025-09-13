@@ -5,15 +5,20 @@ add_executable(engine main.cpp ../glad/src/glad.c
 		application.cpp
 		shaders/shader.cpp
 		shaders/program.cpp
+
 		managers/ProgramManager.cpp
 		managers/TextureManager.cpp
+		managers/FramebufferManager.cpp
+
 		assets/AssetsPath.cpp
 		core/camera.cpp
+
 		ECS/components/lights/point_light.cpp
 		ECS/components/transform.cpp
 		ECS/components/geometry.cpp
 		ECS/ecs.cpp
 		ECS/entity.cpp
+
 		utility/path.cpp
 		content/content_loader.cpp
 		content/mesh.cpp 
@@ -21,8 +26,12 @@ add_executable(engine main.cpp ../glad/src/glad.c
 		content/scene.cpp 
 
 		editor/editor.cpp
+		editor/scene_view.cpp
+		editor/ECS/entity_view.cpp
+		editor/ECS/components/selected_entity_view.cpp
+		editor/ECS/components/transform_view.cpp
 
-		data/FrameBuffer.cpp
+		data/Framebuffer.cpp
 
 )
 

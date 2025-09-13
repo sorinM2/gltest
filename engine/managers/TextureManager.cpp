@@ -9,22 +9,10 @@
 namespace textures 
 {
 
-std::array<GLenum, 32> gl_texture_slots = 
-{
-	GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3, GL_TEXTURE4,
-	GL_TEXTURE5, GL_TEXTURE6, GL_TEXTURE7, GL_TEXTURE8, GL_TEXTURE9, 
-	GL_TEXTURE10, GL_TEXTURE11, GL_TEXTURE12, GL_TEXTURE13, GL_TEXTURE14,
-	GL_TEXTURE15, GL_TEXTURE16, GL_TEXTURE17, GL_TEXTURE18, GL_TEXTURE19, 
-	GL_TEXTURE20, GL_TEXTURE21, GL_TEXTURE22, GL_TEXTURE23, GL_TEXTURE24,
-	GL_TEXTURE25, GL_TEXTURE26, GL_TEXTURE27, GL_TEXTURE28, GL_TEXTURE29,
-	GL_TEXTURE30, GL_TEXTURE31
-};
-
-
-
-std::unordered_map<std::string, texture_2d> textures;
-utl::vector<int, false> free_slots;
-
+namespace  {
+	std::unordered_map<std::string, texture_2d> textures;
+	utl::vector<int, false> free_slots;
+}
 void add_texture(std::string path)
 {
 	if ( path[0] != '*' )
@@ -61,9 +49,9 @@ unsigned int bind_texture(std::string path)
 
 	unsigned int slot = free_slots.emplace_tombstone();
 
-	assert( slot < gl_texture_slots.size() );
+	assert( slot < 32 );
 
-	if ( slot >= gl_texture_slots.size() )
+	if ( slot >= 32 )
 	{
 		spdlog::error( " Error! Too many texture binded at once!");
 		return ~(0);
@@ -84,7 +72,7 @@ utl::vector<unsigned int> set_texture_list(utl::vector<std::string> list)
 {
 	unbind_all();
 	utl::vector<unsigned int> slots;
-	assert(list.size() <= gl_texture_slots.size());
+	assert(list.size() <= 32 );
 
 	for ( auto& texture_path : list )
 	{
@@ -134,7 +122,7 @@ void texture_2d::initialize(std::string path)
 
 void texture_2d::bind(unsigned int slot)
 {
-	glActiveTexture(gl_texture_slots[slot]);
+	glActiveTexture(GL_TEXTURE0 + slot);
 	glBindTexture(GL_TEXTURE_2D, _id);
 	_slot = slot;
 }

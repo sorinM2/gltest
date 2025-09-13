@@ -14,8 +14,11 @@ void mesh::draw(programs::program* prog, glm::mat4 model)
 	glBindBuffer(GL_ARRAY_BUFFER, _VBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
 
+	glm::mat4 normal_model = glm::transpose(glm::inverse(model));
+
 	prog->SetUniformMatrix4fv("model", false, glm::value_ptr(model));
-	
+	prog->SetUniformMatrix4fv("normal_model", false, glm::value_ptr(normal_model));
+
 	std::string _texture_specular = "";
 	std::string _texture = "";
 

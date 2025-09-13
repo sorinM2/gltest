@@ -79,10 +79,10 @@ void Update()
 	
 	glm::vec3 difference = glm::vec3(0.f, 0.f, 0.f);
 
-	rotation.x += key_map[GLFW_KEY_LEFT] * 0.05;
-	rotation.x -= key_map[GLFW_KEY_RIGHT] * 0.05;
-	rotation.y -= key_map[GLFW_KEY_DOWN] * 0.05;
-	rotation.y += key_map[GLFW_KEY_UP] * 0.05;
+	rotation.x += key_map[GLFW_KEY_LEFT] * delta * 60.f;
+	rotation.x -= key_map[GLFW_KEY_RIGHT] * delta * 60.f;
+	rotation.y -= key_map[GLFW_KEY_DOWN] * delta * 60.f;
+	rotation.y += key_map[GLFW_KEY_UP] * delta * 60.f;
 
 	if ( key_map[GLFW_KEY_W] )
 		difference += forward;
@@ -115,6 +115,9 @@ glm::mat4 GetViewMatrix()
 	view_matrix = glm::translate(view_matrix, position);
 	view_matrix = glm::rotate(view_matrix, glm::radians(rotation.x), glm::vec3(0.f, 1.f, 0.f));
 	view_matrix = glm::rotate(view_matrix, glm::radians(rotation.y), glm::vec3(1.f, 0.f, 0.f));
+
+	view_matrix = glm::inverse(view_matrix);
+
 	return view_matrix;
 }
 

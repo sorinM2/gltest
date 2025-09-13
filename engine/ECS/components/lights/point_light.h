@@ -3,11 +3,6 @@
 #include <string>
 #include <unordered_set>
 
-namespace ecs::entity 
-{
-class entity;
-}
-
 namespace ecs::components::transform 
 {
 class transform;
@@ -19,7 +14,7 @@ namespace ecs::components::point_light
 class point_light 
 {
 public:
-	point_light(entity::entity* entity); 
+	point_light(entity::entity_id entity); 
 	void initialize(point_light_id id);
 	void update();
 
@@ -52,7 +47,7 @@ private:
 	std::string get_uniform_name(const std::string& var_name) const;
 	void internal_update_program(unsigned int id);
 private:
-	entity::entity* _entity;
+	entity::entity_id _entity_id;
 	transform::transform* _transform;
 
 	point_light_id _id{id::invalid_id};
@@ -73,7 +68,7 @@ private:
 	bool _active{true};
 };
 
-point_light_id create_point_light(entity::entity* entity);
+point_light_id create_point_light(entity::entity_id entity);
 void delete_point_light(point_light_id id);
 point_light* get_point_light(point_light_id id);
 

@@ -1,13 +1,14 @@
 #include "ecs.h"
-#include "utility/vector.h"
-#include "entity.h"
-#include <iostream>
+
+
 namespace ecs
 {
 	namespace {
 		utl::vector<entity::entity, false, 1024> entity_data;
 		utl::vector<unsigned int> generations;
 	}
+
+utl::vector<entity::entity, false, 1024>& get_entity_vector() { return entity_data; }
 
 constexpr bool is_valid(entity::entity_id id )
 {
@@ -19,9 +20,11 @@ constexpr bool is_valid(entity::entity_id id )
 	return id::generation(id) == generations[index];
 }
 
-entity::entity_id create_entity()
+entity::entity_id create_entity(const std::string& name)
 {
 	unsigned int index = entity_data.emplace_tombstone();	
+	entity_data[index].initialize(index, name);
+
 	if ( entity_data.size() > generations.size() )
 		generations.emplace_back(0);
 	entity_data[index].create_transform();

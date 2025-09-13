@@ -5,6 +5,7 @@
 #include "ECS/components/transform.h"
 #include <iostream>
 #include "ECS/entity.h"
+#include "ECS/ecs.h"
 
 namespace ecs::components::point_light
 {
@@ -13,7 +14,7 @@ namespace ecs::components::point_light
 		utl::vector<unsigned int> generations;  
 	}
 
-point_light_id create_point_light(entity::entity* entity)
+point_light_id create_point_light(entity::entity_id entity)
 {
 	unsigned int index = point_lights.emplace_tombstone(entity);
 	point_lights[index].initialize(index);
@@ -52,7 +53,8 @@ void update()
 		light.update();
 }
 
-point_light::point_light(entity::entity* entity): _entity{entity}{
+point_light::point_light(entity::entity_id entity): _entity_id{entity}{
+	entity::entity* _entity = ecs::get_entity(_entity_id);
 	_transform = _entity->get_transform();
 }
 
@@ -64,6 +66,7 @@ void point_light::initialize(point_light_id id)
 
 void point_light::update()
 {
+	entity::entity* _entity = ecs::get_entity(_entity_id);
 	_transform = _entity->get_transform();
 	glm::vec3 tranform_position = _transform->get_position();
 	if ( tranform_position != _position )

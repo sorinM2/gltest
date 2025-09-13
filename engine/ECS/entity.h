@@ -16,6 +16,12 @@ friend class components::geometry::geometry;
 
 public:
 	entity();
+
+	void initialize(entity_id id,const std::string& name = "unnamed entity");
+
+	std::string get_name() const { return _name; }
+	entity_id get_id() const { return _id; }
+
 	components::transform::transform* get_transform();
 	components::point_light::point_light* get_point_light();
 	components::geometry::geometry* get_geometry();
@@ -28,6 +34,9 @@ public:
 
 	void destroy();
 private:
+	std::string _name = "unnamed entity";
+	entity_id _id{id::invalid_id};
+
 	components::transform::transform_id _transform{id::invalid_id};
 	components::point_light::point_light_id _point_light{id::invalid_id};
 	components::geometry::geometry_id _geometry{id::invalid_id};
