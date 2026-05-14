@@ -28,7 +28,7 @@ void file_browser::update()
 
 	if ( ImGui::Button("back") && (_root_path.compare(_current_path) < 0 || allow_root))
 	{
-		if ( _current_path.string().ends_with('/') )
+		if ( _current_path.string().ends_with('/') or _current_path.string().ends_with('\\'))
 			_current_path = _current_path.parent_path();
 		_current_path = _current_path.parent_path();
 	}

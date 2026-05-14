@@ -66,6 +66,10 @@ bool application::Initialize()
 	prog = programs::AddProgram("default");
 	instanced_prog = programs::AddProgram("instanced");
 	programs::program_id sin_waves = programs::AddProgram("sin_waves", 
+								shaders::GetShadersPath() + "waves/sin_waves.vs",
+						       		shaders::GetShadersPath() + "default.fs"
+						       		);
+	programs::program_id klein_waves = programs::AddProgram("klein_waves", 
 								shaders::GetShadersPath() + "waves/klein.vs",
 						       		shaders::GetShadersPath() + "default.fs"
 						       		);
@@ -90,6 +94,7 @@ bool application::Initialize()
         _instanced_program->Link();
 
 	main_programs.emplace_back(sin_waves);
+	main_programs.emplace_back(klein_waves);
 	main_programs.emplace_back(instanced_prog);
 	main_programs.emplace_back(prog);
 	main_programs.emplace_back(wire_frame);
@@ -106,8 +111,8 @@ bool application::Initialize()
 
 	content::primitives::primitive_data p_data;
 	p_data.scale = 1.f;
-	p_data.divisions_x = 10;
-	p_data.divisions_z = 10;
+	p_data.divisions_x = 500;
+	p_data.divisions_z = 500;
 	content::primitives::create_primitive("plane", content::primitives::primitive_types::plane, p_data);
 	materials::material mat;
 
@@ -124,7 +129,7 @@ bool application::Initialize()
 	glLineWidth(2.5f);
 	float radius = 60.0;
 	float offset = 10.f;
-	int amount = 1;
+	int amount = 200;
 	for ( unsigned int i = 0; i < amount; ++i )
 	{	
 		float angle = (float)i / (float)amount * 360.0f;

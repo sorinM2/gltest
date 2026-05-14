@@ -22,7 +22,7 @@ add_library(serializer STATIC
         ecs/components/transform.cpp
 )
 
-target_include_directories(engine PUBLIC ../ )
-target_include_directories(engine PUBLIC ../serializer )
+target_include_directories(serializer PUBLIC ../ )
+target_include_directories(serializer BEFORE PUBLIC ../serializer )
 
 target_link_libraries(serializer engine)
